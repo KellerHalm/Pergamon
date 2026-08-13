@@ -1,0 +1,11 @@
+build/bin/
+frontend/build/
+frontend/.svelte-kit/
+frontend/node_modules/
+frontend/package.json.md5
+frontend/wailsjs/
+*.exe
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "mimosa-hook-status/v1",
+  "recordedAt": "2026-08-11T10:36:17.225Z",
+  "sessionId": "sess_233e87e5-5b7a-4a1c-84fd-21a62ea8b7bd",
+  "event": "PostToolUse",
+  "toolName": "Write",
+  "file": "C:\\Users\\Sallim\\Desktop\\Dakia\\cmd\\dbtest\\main.go",
+  "outcome": "inconclusive",
+  "coverage": "partial",
+  "findingCount": 0,
+  "durationMs": 12,
+  "hostState": "hook_complete",
+  "reportHint": ".mimosa/reports/"
+}

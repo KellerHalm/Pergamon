@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Локальная Медиатека</title>
+		<script>
+			const applyTheme = () => {
+				try {
+					const t = localStorage.getItem('theme') || 'dark';
+					document.documentElement.setAttribute('data-theme', t);
+					const a = localStorage.getItem('accent') || '#7c5cff';
+					document.documentElement.style.setProperty('--accent', a);
+				} catch (e) {}
+			};
+			applyTheme();
+		</script>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

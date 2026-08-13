@@ -1,0 +1,73 @@
+const READ_CATEGORIES = [
+  { id: "book", label: "Книга" },
+  { id: "manga", label: "Манга" },
+  { id: "comic", label: "Комикс" },
+  { id: "novel", label: "Ранобэ" }
+];
+const WATCH_CATEGORIES = [
+  { id: "movie", label: "Фильм" },
+  { id: "series", label: "Сериал" },
+  { id: "anime", label: "Аниме" },
+  { id: "cartoon", label: "Мультфильм" }
+];
+[...READ_CATEGORIES, ...WATCH_CATEGORIES];
+const TYPES = [
+  { id: "read", label: "Читать" },
+  { id: "watch", label: "Смотреть" }
+];
+const STATUSES = [
+  { id: "planned", label: "Запланировано", color: "#5b9cff" },
+  { id: "progress", label: "В процессе", color: "#f5a623" },
+  { id: "done", label: "Завершено", color: "#34c759" },
+  { id: "paused", label: "Отложено", color: "#8e8e93" },
+  { id: "dropped", label: "Брошено", color: "#ff453a" }
+];
+const NAME_KINDS = [
+  { id: "original", label: "Оригинальное" },
+  { id: "english", label: "Английское" },
+  { id: "russian", label: "Русское" },
+  { id: "alt", label: "Альтернативное" }
+];
+const CREATOR_ROLES = [
+  { id: "author", label: "Автор" },
+  { id: "artist", label: "Художник" },
+  { id: "director", label: "Режиссёр" },
+  { id: "studio", label: "Студия" }
+];
+const READ_PROGRESS = [
+  { id: "volumes", label: "Тома" },
+  { id: "chapters", label: "Главы" },
+  { id: "pages", label: "Страницы" }
+];
+const WATCH_PROGRESS = [
+  { id: "seasons", label: "Сезоны" },
+  { id: "episodes", label: "Серии" },
+  { id: "minutes", label: "Минуты" }
+];
+function statusLabel(id) {
+  return STATUSES.find((s) => s.id === id)?.label || id;
+}
+function statusColor(id) {
+  return STATUSES.find((s) => s.id === id)?.color || "#8e8e93";
+}
+function displayName(names) {
+  if (!names || names.length === 0) return "Без названия";
+  const ru = names.find((n) => n.kind === "russian");
+  const en = names.find((n) => n.kind === "english");
+  const orig = names.find((n) => n.kind === "original");
+  return (ru || en || orig || names[0]).value;
+}
+function progressForType(type) {
+  return type === "watch" ? WATCH_PROGRESS : READ_PROGRESS;
+}
+export {
+  CREATOR_ROLES as C,
+  NAME_KINDS as N,
+  READ_CATEGORIES as R,
+  STATUSES as S,
+  TYPES as T,
+  statusLabel as a,
+  displayName as d,
+  progressForType as p,
+  statusColor as s
+};
