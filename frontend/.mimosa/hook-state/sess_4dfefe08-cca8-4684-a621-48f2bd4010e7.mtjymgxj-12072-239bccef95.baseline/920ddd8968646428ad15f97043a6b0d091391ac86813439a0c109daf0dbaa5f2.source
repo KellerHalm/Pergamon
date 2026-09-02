@@ -1,0 +1,142 @@
+import { a as sanitize_props, b as spread_props, c as slot, d as ensure_array_like, h as attr_class, e as escape_html, f as attr, j as stringify, k as attr_style, l as derived } from "../../../chunks/index.js";
+import { d as displayName } from "../../../chunks/constants.js";
+import { P as Plus } from "../../../chunks/plus.js";
+import { I as Icon } from "../../../chunks/Icon.js";
+function Trash_2($$renderer, $$props) {
+  const $$sanitized_props = sanitize_props($$props);
+  /**
+   * @license lucide-svelte v0.460.1 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   */
+  const iconNode = [
+    ["path", { "d": "M3 6h18" }],
+    ["path", { "d": "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }],
+    ["path", { "d": "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }],
+    ["line", { "x1": "10", "x2": "10", "y1": "11", "y2": "17" }],
+    ["line", { "x1": "14", "x2": "14", "y1": "11", "y2": "17" }]
+  ];
+  Icon($$renderer, spread_props([
+    { name: "trash-2" },
+    $$sanitized_props,
+    {
+      /**
+       * @component @name Trash2
+       * @description Lucide SVG icon component, renders SVG Element with children.
+       *
+       * @preview ![img](data:image/svg+xml;base64,PHN2ZyAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIgogIHdpZHRoPSIyNCIKICBoZWlnaHQ9IjI0IgogIHZpZXdCb3g9IjAgMCAyNCAyNCIKICBmaWxsPSJub25lIgogIHN0cm9rZT0iIzAwMCIgc3R5bGU9ImJhY2tncm91bmQtY29sb3I6ICNmZmY7IGJvcmRlci1yYWRpdXM6IDJweCIKICBzdHJva2Utd2lkdGg9IjIiCiAgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIgogIHN0cm9rZS1saW5lam9pbj0icm91bmQiCj4KICA8cGF0aCBkPSJNMyA2aDE4IiAvPgogIDxwYXRoIGQ9Ik0xOSA2djE0YzAgMS0xIDItMiAySDdjLTEgMC0yLTEtMi0yVjYiIC8+CiAgPHBhdGggZD0iTTggNlY0YzAtMSAxLTIgMi0yaDRjMSAwIDIgMSAyIDJ2MiIgLz4KICA8bGluZSB4MT0iMTAiIHgyPSIxMCIgeTE9IjExIiB5Mj0iMTciIC8+CiAgPGxpbmUgeDE9IjE0IiB4Mj0iMTQiIHkxPSIxMSIgeTI9IjE3IiAvPgo8L3N2Zz4K) - https://lucide.dev/icons/trash-2
+       * @see https://lucide.dev/guide/packages/lucide-svelte - Documentation
+       *
+       * @param {Object} props - Lucide icons props and any valid SVG attribute
+       * @returns {FunctionalComponent} Svelte component
+       *
+       */
+      iconNode,
+      children: ($$renderer2) => {
+        $$renderer2.push(`<!--[-->`);
+        slot($$renderer2, $$props, "default", {});
+        $$renderer2.push(`<!--]-->`);
+      },
+      $$slots: { default: true }
+    }
+  ]));
+}
+function _page($$renderer, $$props) {
+  $$renderer.component(($$renderer2) => {
+    let shelves = [];
+    let titlesMap = {};
+    let activeShelf = null;
+    let coverCache = {};
+    const activeShelfObj = derived(() => shelves.find((s) => s.id === activeShelf) || null);
+    function shelfTitles(shelf) {
+      return shelf.titleIds.map((id) => titlesMap[id]).filter(Boolean);
+    }
+    function spinalColor(title) {
+      return title.spineColor || "#5b6470";
+    }
+    $$renderer2.push(`<div class="page svelte-13f8jir"><div class="topbar svelte-13f8jir"><h1 class="svelte-13f8jir">Виртуальная полка</h1> `);
+    if (activeShelfObj()) {
+      $$renderer2.push("<!--[0-->");
+      $$renderer2.push(`<button class="btn">`);
+      Plus($$renderer2, { size: 14 });
+      $$renderer2.push(`<!----> Добавить тайтл</button>`);
+    } else {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--> <button class="btn btn-primary">`);
+    Plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> Новая полка</button></div> `);
+    {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--> `);
+    if (shelves.length === 0) {
+      $$renderer2.push("<!--[0-->");
+      $$renderer2.push(`<div class="empty svelte-13f8jir"><div class="empty-icon svelte-13f8jir">📚</div> <h2>Нет полок</h2> <p>Создайте полку, чтобы расставить тайтлы</p></div>`);
+    } else {
+      $$renderer2.push("<!--[-1-->");
+      $$renderer2.push(`<div class="shelf-tabs svelte-13f8jir"><!--[-->`);
+      const each_array_1 = ensure_array_like(shelves);
+      for (let $$index_1 = 0, $$length = each_array_1.length; $$index_1 < $$length; $$index_1++) {
+        let sh = each_array_1[$$index_1];
+        $$renderer2.push(`<button${attr_class("tab svelte-13f8jir", void 0, { "active": activeShelf === sh.id })}>${escape_html(sh.name)} <span class="tab-count svelte-13f8jir">${escape_html(sh.titleIds?.length ?? 0)}</span></button> <button class="tab-del svelte-13f8jir" title="Удалить">`);
+        Trash_2($$renderer2, { size: 12 });
+        $$renderer2.push(`<!----></button>`);
+      }
+      $$renderer2.push(`<!--]--></div> `);
+      if (activeShelfObj()) {
+        $$renderer2.push("<!--[0-->");
+        const shelf = activeShelfObj();
+        if (shelf) {
+          $$renderer2.push("<!--[0-->");
+          if (shelfTitles(shelf).length === 0) {
+            $$renderer2.push("<!--[0-->");
+            $$renderer2.push(`<div class="empty-sm svelte-13f8jir">Пустая полка — нажмите «Добавить тайтл», чтобы наполнить её</div>`);
+          } else if (shelf.kind === "read") {
+            $$renderer2.push("<!--[1-->");
+            $$renderer2.push(`<div class="bookshelf svelte-13f8jir"><div class="wood-plank top svelte-13f8jir"></div> <div class="books svelte-13f8jir"><!--[-->`);
+            const each_array_2 = ensure_array_like(shelfTitles(shelf));
+            for (let i = 0, $$length = each_array_2.length; i < $$length; i++) {
+              let t = each_array_2[i];
+              $$renderer2.push(`<a${attr("href", `/title/${stringify(t.id)}`)} class="book-spine svelte-13f8jir"${attr_style(`background:${stringify(spinalColor(t))}; height:${stringify(60 + Math.random() * 40)}px`)}><span class="spine-text svelte-13f8jir">${escape_html(displayName(t.names))}</span></a>`);
+            }
+            $$renderer2.push(`<!--]--></div> <div class="wood-plank bottom svelte-13f8jir"></div></div>`);
+          } else {
+            $$renderer2.push("<!--[-1-->");
+            $$renderer2.push(`<div class="mediashelf svelte-13f8jir"><!--[-->`);
+            const each_array_3 = ensure_array_like(shelfTitles(shelf));
+            for (let $$index_3 = 0, $$length = each_array_3.length; $$index_3 < $$length; $$index_3++) {
+              let t = each_array_3[$$index_3];
+              $$renderer2.push(`<a${attr("href", `/title/${stringify(t.id)}`)} class="dvd-case svelte-13f8jir"><div class="dvd-spine svelte-13f8jir"${attr_style(`background:${stringify(spinalColor(t))}`)}><span class="dvd-text svelte-13f8jir">${escape_html(displayName(t.names))}</span></div> <div class="dvd-cover svelte-13f8jir">`);
+              if (coverCache[t.cover]) {
+                $$renderer2.push("<!--[0-->");
+                $$renderer2.push(`<img${attr("src", coverCache[t.cover])} alt="" class="svelte-13f8jir"/>`);
+              } else {
+                $$renderer2.push("<!--[-1-->");
+                $$renderer2.push(`<span class="dvd-placeholder svelte-13f8jir">D</span>`);
+              }
+              $$renderer2.push(`<!--]--></div></a>`);
+            }
+            $$renderer2.push(`<!--]--></div>`);
+          }
+          $$renderer2.push(`<!--]-->`);
+        } else {
+          $$renderer2.push("<!--[-1-->");
+        }
+        $$renderer2.push(`<!--]-->`);
+      } else {
+        $$renderer2.push("<!--[-1-->");
+      }
+      $$renderer2.push(`<!--]-->`);
+    }
+    $$renderer2.push(`<!--]--> `);
+    {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--></div>`);
+  });
+}
+export {
+  _page as default
+};
