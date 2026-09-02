@@ -22,11 +22,11 @@
 
 	async function load() {
 		loading = true;
-		shelves = await shelvesApi.list();
+		shelves = (await shelvesApi.list()) || [];
 		if (shelves.length > 0 && activeShelf === null) {
 			activeShelf = shelves[0].id;
 		}
-		const allIds = shelves.flatMap((s) => s.titleIds);
+		const allIds = shelves.flatMap((s) => s.titleIds || []);
 		const unique = [...new Set(allIds)];
 		const map: Record<number, Title> = {};
 		for (const id of unique) {
@@ -118,7 +118,7 @@
 			{#each shelves as sh}
 				<button class="tab" class:active={activeShelf === sh.id} onclick={() => (activeShelf = sh.id)}>
 					{sh.name}
-					<span class="tab-count">{sh.titleIds.length}</span>
+					<span class="tab-count">{sh.titleIds?.length ?? 0}</span>
 				</button>
 				<button class="tab-del" onclick={() => deleteShelf(sh.id)} title="Удалить">
 					<Trash2 size={12} />

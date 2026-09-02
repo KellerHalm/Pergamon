@@ -1,14 +1,14 @@
 {
   "schemaVersion": "mimosa-hook-status/v1",
-  "recordedAt": "2026-08-12T10:35:52.263Z",
+  "recordedAt": "2026-09-02T10:17:56.886Z",
   "sessionId": "sess_233e87e5-5b7a-4a1c-84fd-21a62ea8b7bd",
   "event": "PostToolUse",
   "toolName": "Edit",
-  "file": "frontend/src/routes/shelf/+page.svelte",
+  "file": "frontend/src/routes/+layout.svelte",
   "outcome": "clear",
   "coverage": "complete",
   "findingCount": 0,
-  "durationMs": 8,
+  "durationMs": 9,
   "hostState": "hook_complete",
   "reportHint": ".mimosa/reports/"
 }

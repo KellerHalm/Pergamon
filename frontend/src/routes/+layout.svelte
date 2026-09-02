@@ -55,6 +55,7 @@
 		<button class="theme-toggle" onclick={toggleTheme} title="Сменить тему">
 			{theme === 'dark' ? '☀️ Светлая' : '🌙 Тёмная'}
 		</button>
+		<div class="version">v1.1</div>
 	</aside>
 
 	<nav class="mobile-nav">
@@ -142,6 +143,12 @@
 	.theme-toggle:hover {
 		background: var(--bg-elev-2);
 		color: var(--text);
+	}
+
+	.version {
+		font-size: 10px;
+		color: var(--text-faint);
+		padding: 4px 12px;
 	}
 
 	.mobile-nav {

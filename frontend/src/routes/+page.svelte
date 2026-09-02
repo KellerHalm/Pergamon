@@ -24,23 +24,24 @@
 	let debounce: any;
 
 	onMount(async () => {
-		allTags = await metaApi.allTags();
+		allTags = (await metaApi.allTags()) || [];
 		await load();
 	});
 
 	async function load() {
 		loading = true;
 		try {
-			titles = await titlesApi.list({
+			titles = (await titlesApi.list({
 				sort,
 				type: typeFilter,
 				category: catFilter,
 				status: statusFilter,
 				search,
 				tags: tagFilter ? [tagFilter] : []
-			});
+			})) || [];
 		} catch (e) {
 			console.error(e);
+			titles = [];
 		}
 		loading = false;
 	}

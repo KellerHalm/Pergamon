@@ -1,0 +1,207 @@
+export namespace main {
+	
+	export class ListQuery {
+	    sort: string;
+	    type: string;
+	    category: string;
+	    status: string;
+	    tags: string[];
+	    search: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ListQuery(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sort = source["sort"];
+	        this.type = source["type"];
+	        this.category = source["category"];
+	        this.status = source["status"];
+	        this.tags = source["tags"];
+	        this.search = source["search"];
+	    }
+	}
+
+}
+
+export namespace store {
+	
+	export class Creator {
+	    role: string;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Creator(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.role = source["role"];
+	        this.name = source["name"];
+	    }
+	}
+	export class Name {
+	    kind: string;
+	    value: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Name(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.value = source["value"];
+	    }
+	}
+	export class Progress {
+	    volumes: number;
+	    chapters: number;
+	    pages: number;
+	    seasons: number;
+	    episodes: number;
+	    minutes: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Progress(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.volumes = source["volumes"];
+	        this.chapters = source["chapters"];
+	        this.pages = source["pages"];
+	        this.seasons = source["seasons"];
+	        this.episodes = source["episodes"];
+	        this.minutes = source["minutes"];
+	    }
+	}
+	export class Shelf {
+	    id: number;
+	    name: string;
+	    kind: string;
+	    position: number;
+	    titleIds: number[];
+	    createdAt: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Shelf(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.kind = source["kind"];
+	        this.position = source["position"];
+	        this.titleIds = source["titleIds"];
+	        this.createdAt = source["createdAt"];
+	    }
+	}
+	export class Title {
+	    id: number;
+	    type: string;
+	    category: string;
+	    names: Name[];
+	    cover: string;
+	    synopsis: string;
+	    creators: Creator[];
+	    genres: string[];
+	    tags: string[];
+	    score: number;
+	    status: string;
+	    customList: string;
+	    progress: Progress;
+	    notes: string;
+	    spineColor: string;
+	    createdAt: string;
+	    updatedAt: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Title(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.type = source["type"];
+	        this.category = source["category"];
+	        this.names = this.convertValues(source["names"], Name);
+	        this.cover = source["cover"];
+	        this.synopsis = source["synopsis"];
+	        this.creators = this.convertValues(source["creators"], Creator);
+	        this.genres = source["genres"];
+	        this.tags = source["tags"];
+	        this.score = source["score"];
+	        this.status = source["status"];
+	        this.customList = source["customList"];
+	        this.progress = this.convertValues(source["progress"], Progress);
+	        this.notes = source["notes"];
+	        this.spineColor = source["spineColor"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace sync {
+	
+	export class SyncResult {
+	    direction: string;
+	    uploaded: number;
+	    message: string;
+	    time: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SyncResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.direction = source["direction"];
+	        this.uploaded = source["uploaded"];
+	        this.message = source["message"];
+	        this.time = source["time"];
+	    }
+	}
+	export class WebDAVConfig {
+	    url: string;
+	    username: string;
+	    password: string;
+	    remoteDir: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new WebDAVConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.url = source["url"];
+	        this.username = source["username"];
+	        this.password = source["password"];
+	        this.remoteDir = source["remoteDir"];
+	    }
+	}
+
+}
+
