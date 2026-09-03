@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { titlesApi, coverApi } from '$lib/api';
+	import { onMount } from 'svelte';
+	import { titlesApi, coverApi, shelvesApi } from '$lib/api';
 	import {
 		TYPES,
 		ALL_CATEGORIES,
@@ -13,7 +14,7 @@
 		WATCH_PROGRESS,
 		progressForType
 	} from '$lib/constants';
-	import type { Title } from '../../app.d';
+	import type { Title, Shelf } from '../../app.d';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Minus from 'lucide-svelte/icons/minus';
 	import ImagePlus from 'lucide-svelte/icons/image-plus';
@@ -31,11 +32,19 @@
 	let score = $state(0);
 	let status = $state('planned');
 	let customList = $state('');
-	let progress = $state({ volumes: 0, chapters: 0, pages: 0, seasons: 0, episodes: 0, minutes: 0 });
+	let progress: Record<string, number> = $state({ volumes: 0, chapters: 0, pages: 0, seasons: 0, episodes: 0, minutes: 0 });
 	let coverUrlInput = $state('');
 	let coverUploading = $state(false);
 	let saving = $state(false);
 	let error = $state('');
+	let shelves = $state<Shelf[]>([]);
+	let shelfId = $state(0);
+
+	const typeShelves = $derived(shelves.filter((s) => s.kind === type));
+
+	onMount(async () => {
+		shelves = (await shelvesApi.list()) || [];
+	});
 
 	$effect(() => {
 		if (type === 'read' && !READ_CATEGORIES.find((c) => c.id === category)) {
@@ -43,6 +52,9 @@
 		}
 		if (type === 'watch' && !WATCH_CATEGORIES.find((c) => c.id === category)) {
 			category = 'movie';
+		}
+		if (shelfId !== 0 && !typeShelves.find((s) => s.id === shelfId)) {
+			shelfId = 0;
 		}
 	});
 
@@ -95,13 +107,24 @@
 				score,
 				status,
 				customList,
-				progress,
+				progress: {
+					volumes: progress.volumes,
+					chapters: progress.chapters,
+					pages: progress.pages,
+					seasons: progress.seasons,
+					episodes: progress.episodes,
+					minutes: progress.minutes
+				},
 				notes: '',
 				spineColor: '',
 				createdAt: '',
 				updatedAt: ''
 			};
 			const id = await titlesApi.save(t);
+			if (shelfId !== 0) {
+				const sh = shelves.find((s) => s.id === shelfId);
+				if (sh) await shelvesApi.setItems(shelfId, [...(sh.titleIds || []), id]);
+			}
 			goto('/title/' + id);
 		} catch (e: any) {
 			error = e.message || 'Ошибка сохранения';
@@ -238,6 +261,16 @@
 				</select>
 			</div>
 		</div>
+
+		{#if typeShelves.length > 0}
+			<div class="field">
+				<span class="label">Полка</span>
+				<select class="select" bind:value={shelfId}>
+					<option value={0}>Без полки</option>
+					{#each typeShelves as s}<option value={s.id}>{s.name}</option>{/each}
+				</select>
+			</div>
+		{/if}
 
 		<div class="field">
 			<span class="label">Свой список</span>

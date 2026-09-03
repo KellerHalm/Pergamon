@@ -3,10 +3,11 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import RichEditor from '$lib/components/RichEditor.svelte';
-	import { titlesApi, coverApi } from '$lib/api';
+	import { titlesApi, coverApi, shelvesApi } from '$lib/api';
 	import {
 		STATUSES,
-		ALL_CATEGORIES,
+		READ_CATEGORIES,
+		WATCH_CATEGORIES,
 		TYPES,
 		NAME_KINDS,
 		CREATOR_ROLES,
@@ -18,7 +19,7 @@
 		typeLabel,
 		progressForType
 	} from '$lib/constants';
-	import type { Title } from '../../app.d';
+	import type { Title, Shelf } from '../../../app.d';
 	import ArrowLeft from 'lucide-svelte/icons/arrow-left';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import Plus from 'lucide-svelte/icons/plus';
@@ -32,9 +33,23 @@
 	let notesHtml = $state('');
 
 	let editTitle = $state<any>(null);
+	let shelves = $state<Shelf[]>([]);
+	let editShelfId = $state(0);
+	let editShelfInitial = $state(0);
 	let notesTimer: any;
 
 	const id = $derived(Number($page.params.id));
+	const editShelfOptions = $derived(shelves.filter((s) => s.kind === (title?.type ?? '')));
+
+	$effect(() => {
+		if (!editTitle) return;
+		if (editTitle.type === 'read' && !READ_CATEGORIES.find((c) => c.id === editTitle.category)) {
+			editTitle.category = 'book';
+		}
+		if (editTitle.type === 'watch' && !WATCH_CATEGORIES.find((c) => c.id === editTitle.category)) {
+			editTitle.category = 'movie';
+		}
+	});
 
 	onMount(async () => {
 		await load();
@@ -62,22 +77,39 @@
 		notesTimer = setTimeout(async () => {
 			if (!title) return;
 			title.notes = html;
-			title = await titlesApi.save({ ...title });
+			await titlesApi.save({ ...title });
 		}, 500);
 	}
 
-	function startEdit() {
+	async function startEdit() {
 		editTitle = JSON.parse(JSON.stringify(title));
 		editTitle.names = [...editTitle.names];
 		editTitle.creators = [...editTitle.creators];
 		editTitle.genres = [...editTitle.genres];
 		editTitle.tags = [...editTitle.tags];
+		shelves = (await shelvesApi.list()) || [];
+		editShelfId = shelves.find((s) => s.titleIds.includes(id))?.id ?? 0;
+		editShelfInitial = editShelfId;
 		editing = true;
 	}
 
 	async function saveEdit() {
 		if (!editTitle) return;
 		await titlesApi.save(editTitle);
+		if (editShelfId !== editShelfInitial) {
+			const current = shelves.filter((s) => s.titleIds.includes(id));
+			for (const s of current) {
+				if (s.id !== editShelfId) {
+					await shelvesApi.setItems(s.id, s.titleIds.filter((x) => x !== id));
+				}
+			}
+			if (editShelfId !== 0) {
+				const target = shelves.find((s) => s.id === editShelfId);
+				if (target && !target.titleIds.includes(id)) {
+					await shelvesApi.setItems(target.id, [...target.titleIds, id]);
+				}
+			}
+		}
 		editing = false;
 		await load();
 	}
@@ -158,7 +190,11 @@
 					<div class="field">
 						<span class="label">Категория</span>
 						<select class="select" bind:value={e.category}>
-							{#each ALL_CATEGORIES as c}<option value={c.id}>{c.label}</option>{/each}
+							{#if e.type === 'read'}
+								{#each READ_CATEGORIES as c}<option value={c.id}>{c.label}</option>{/each}
+							{:else}
+								{#each WATCH_CATEGORIES as c}<option value={c.id}>{c.label}</option>{/each}
+							{/if}
 						</select>
 					</div>
 				</div>
@@ -238,6 +274,16 @@
 						</select>
 					</div>
 				</div>
+
+				{#if editShelfOptions.length > 0}
+					<div class="field">
+						<span class="label">Полка</span>
+						<select class="select" bind:value={editShelfId}>
+							<option value={0}>Без полки</option>
+							{#each editShelfOptions as s}<option value={s.id}>{s.name}</option>{/each}
+						</select>
+					</div>
+				{/if}
 
 				{#if e.customList}
 					<div class="field">
