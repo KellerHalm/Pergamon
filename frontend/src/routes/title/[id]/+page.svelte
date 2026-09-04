@@ -17,6 +17,7 @@
 		statusLabel,
 		statusColor,
 		releaseStatusLabel,
+		releaseStatusColor,
 		categoryLabel,
 		typeLabel,
 		progressForType
@@ -400,42 +401,45 @@
 							{/if}
 						</div>
 						<div class="badge-menu">
-							<button
-								class="badge dim"
-								onclick={(e) => {
-									e.stopPropagation();
-									statusMenu = statusMenu === 'release' ? '' : 'release';
-								}}
-							>
-								{releaseStatusLabel(title.releaseStatus) || 'Не указан'}
-							</button>
-							{#if statusMenu === 'release'}
-								<div class="menu">
-									<button
-										class="menu-item"
-										class:active={title.releaseStatus === ''}
-										onclick={(e) => {
-											e.stopPropagation();
-											pickStatus('releaseStatus', '');
-										}}
-									>
-										Не указан
-									</button>
-									{#each RELEASE_STATUSES as s}
+								<button
+									class="badge"
+									style="background:{releaseStatusColor(title.releaseStatus)}22;color:{releaseStatusColor(title.releaseStatus)}"
+									onclick={(e) => {
+										e.stopPropagation();
+										statusMenu = statusMenu === 'release' ? '' : 'release';
+									}}
+								>
+									{releaseStatusLabel(title.releaseStatus) || 'Не указан'}
+								</button>
+								{#if statusMenu === 'release'}
+									<div class="menu">
 										<button
 											class="menu-item"
-											class:active={title.releaseStatus === s.id}
+											class:active={title.releaseStatus === ''}
 											onclick={(e) => {
 												e.stopPropagation();
-												pickStatus('releaseStatus', s.id);
+												pickStatus('releaseStatus', '');
 											}}
 										>
-											{s.label}
+											<span class="dot" style="background:{releaseStatusColor('')}"></span>
+											Не указан
 										</button>
-									{/each}
-								</div>
-							{/if}
-						</div>
+										{#each RELEASE_STATUSES as s}
+											<button
+												class="menu-item"
+												class:active={title.releaseStatus === s.id}
+												onclick={(e) => {
+													e.stopPropagation();
+													pickStatus('releaseStatus', s.id);
+												}}
+											>
+												<span class="dot" style="background:{s.color}"></span>
+												{s.label}
+											</button>
+										{/each}
+									</div>
+								{/if}
+							</div>
 						{#if title.score > 0}
 							<span class="badge score">★ {title.score.toFixed(1)}</span>
 						{/if}

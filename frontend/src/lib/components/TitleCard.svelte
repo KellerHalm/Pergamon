@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Title } from '../../app.d';
-	import { displayName, statusLabel, statusColor, progressForType } from '../constants';
+	import { displayName, statusLabel, statusColor, progressForType, releaseStatusLabel, releaseStatusColor } from '../constants';
 	import { coverApi } from '../api';
 	import { onMount } from 'svelte';
 
@@ -35,6 +35,11 @@
 			{:else if loaded}
 				<div class="poster-placeholder">{displayName(title.names)[0]}</div>
 			{/if}
+			{#if title.releaseStatus}
+				<span class="release-badge" style="background:{releaseStatusColor(title.releaseStatus)}e6">
+					{releaseStatusLabel(title.releaseStatus)}
+				</span>
+			{/if}
 			<span class="status-dot" style="background:{statusColor(title.status)}"></span>
 		</div>
 		<div class="info">
@@ -62,6 +67,11 @@
 				<span class="badge-sm" style="background:{statusColor(title.status)}22;color:{statusColor(title.status)}">
 					{statusLabel(title.status)}
 				</span>
+				{#if title.releaseStatus}
+					<span class="badge-sm" style="background:{releaseStatusColor(title.releaseStatus)}22;color:{releaseStatusColor(title.releaseStatus)}">
+						{releaseStatusLabel(title.releaseStatus)}
+					</span>
+				{/if}
 				{#if title.score > 0}<span class="score">★ {title.score.toFixed(1)}</span>{/if}
 				{#if progressText(title)}<span class="prog">{progressText(title)}</span>{/if}
 			</div>
@@ -118,6 +128,18 @@
 		height: 12px;
 		border-radius: 50%;
 		border: 2px solid var(--bg);
+	}
+	.release-badge {
+		position: absolute;
+		top: 8px;
+		left: 8px;
+		padding: 2px 8px;
+		border-radius: 99px;
+		font-size: 10px;
+		font-weight: 700;
+		color: #fff;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 	}
 
 	.info {
