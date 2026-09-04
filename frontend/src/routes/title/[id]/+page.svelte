@@ -6,6 +6,7 @@
 	import { titlesApi, coverApi, shelvesApi } from '$lib/api';
 	import {
 		STATUSES,
+		RELEASE_STATUSES,
 		READ_CATEGORIES,
 		WATCH_CATEGORIES,
 		TYPES,
@@ -13,7 +14,6 @@
 		CREATOR_ROLES,
 		READ_PROGRESS,
 		WATCH_PROGRESS,
-		statusLabel,
 		statusColor,
 		categoryLabel,
 		typeLabel,
@@ -69,6 +69,11 @@
 
 	async function adjustProgress(field: string, delta: number) {
 		title = await titlesApi.adjustProgress(id, field, delta);
+	}
+
+	async function saveStatuses() {
+		if (!title) return;
+		await titlesApi.save({ ...title });
 	}
 
 	async function saveNotes(html: string) {
@@ -268,11 +273,19 @@
 						<input type="number" class="input" min="0" max="5" step="0.5" bind:value={e.score} />
 					</div>
 					<div class="field">
-						<span class="label">Статус</span>
+						<span class="label">Мой статус</span>
 						<select class="select" bind:value={e.status}>
 							{#each STATUSES as s}<option value={s.id}>{s.label}</option>{/each}
 						</select>
 					</div>
+				</div>
+
+				<div class="field">
+					<span class="label">Статус тайтла</span>
+					<select class="select" bind:value={e.releaseStatus}>
+						<option value="">Не указан</option>
+						{#each RELEASE_STATUSES as s}<option value={s.id}>{s.label}</option>{/each}
+					</select>
 				</div>
 
 				{#if editShelfOptions.length > 0}
@@ -305,6 +318,17 @@
 								</div>
 							</div>
 						{/each}
+						{#if e.type === 'read'}
+							<div class="prog-item">
+								<span class="prog-label">Вышло глав</span>
+								<input type="number" class="input sm" min="0" bind:value={e.progress.totalChapters} />
+							</div>
+						{:else}
+							<div class="prog-item">
+								<span class="prog-label">Вышло серий</span>
+								<input type="number" class="input sm" min="0" bind:value={e.progress.totalEpisodes} />
+							</div>
+						{/if}
 					</div>
 				</div>
 
@@ -331,9 +355,18 @@
 						</div>
 					{/if}
 					<div class="badges">
-						<span class="badge" style="background:{statusColor(title.status)}22;color:{statusColor(title.status)}">
-							{statusLabel(title.status)}
-						</span>
+						<select
+							class="badge badge-select"
+							style="background-color:{statusColor(title.status)}22;color:{statusColor(title.status)}"
+							bind:value={title.status}
+							onchange={saveStatuses}
+						>
+							{#each STATUSES as s}<option value={s.id}>{s.label}</option>{/each}
+						</select>
+						<select class="badge badge-select dim" bind:value={title.releaseStatus} onchange={saveStatuses}>
+							<option value="">Не указан</option>
+							{#each RELEASE_STATUSES as s}<option value={s.id}>{s.label}</option>{/each}
+						</select>
 						{#if title.score > 0}
 							<span class="badge score">★ {title.score.toFixed(1)}</span>
 						{/if}
@@ -358,21 +391,40 @@
 				</section>
 			{/if}
 
-			<section class="section">
-				<h3>Прогресс</h3>
-				<div class="progress-grid">
-					{#each progressForType(title.type) as f}
-						<div class="prog-block">
-							<span class="prog-name">{f.label}</span>
-							<div class="prog-controls">
-								<button class="btn btn-icon" onclick={() => adjustProgress(f.id, -1)}><Minus size={18} /></button>
-								<span class="prog-val">{(title.progress as any)[f.id]}</span>
-								<button class="btn btn-icon" onclick={() => adjustProgress(f.id, 1)}><Plus size={18} /></button>
+				<section class="section">
+					<h3>Прогресс</h3>
+					<div class="progress-grid">
+						{#each progressForType(title.type) as f}
+							<div class="prog-block">
+								<span class="prog-name">{f.label}</span>
+								<div class="prog-controls">
+									<button class="btn btn-icon" onclick={() => adjustProgress(f.id, -1)}><Minus size={18} /></button>
+									<span class="prog-val">{(title.progress as any)[f.id]}</span>
+									<button class="btn btn-icon" onclick={() => adjustProgress(f.id, 1)}><Plus size={18} /></button>
+								</div>
 							</div>
-						</div>
-					{/each}
-				</div>
-			</section>
+						{/each}
+						{#if title.type === 'read'}
+							<div class="prog-block">
+								<span class="prog-name">Вышло глав</span>
+								<div class="prog-controls">
+									<button class="btn btn-icon" onclick={() => adjustProgress('totalChapters', -1)}><Minus size={18} /></button>
+									<span class="prog-val">{title.progress.totalChapters}</span>
+									<button class="btn btn-icon" onclick={() => adjustProgress('totalChapters', 1)}><Plus size={18} /></button>
+								</div>
+							</div>
+						{:else}
+							<div class="prog-block">
+								<span class="prog-name">Вышло серий</span>
+								<div class="prog-controls">
+									<button class="btn btn-icon" onclick={() => adjustProgress('totalEpisodes', -1)}><Minus size={18} /></button>
+									<span class="prog-val">{title.progress.totalEpisodes}</span>
+									<button class="btn btn-icon" onclick={() => adjustProgress('totalEpisodes', 1)}><Plus size={18} /></button>
+								</div>
+							</div>
+						{/if}
+					</div>
+				</section>
 
 			<section class="section">
 				<h3>Заметки</h3>
@@ -460,6 +512,25 @@
 	.badge.dim {
 		background: var(--bg-elev-2);
 		color: var(--text-dim);
+	}
+	.badge-select {
+		appearance: none;
+		-webkit-appearance: none;
+		border: none;
+		cursor: pointer;
+		font-family: inherit;
+		padding-right: 20px;
+		background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath fill='%23888' d='M0 0h8L4 5z'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 7px center;
+	}
+	.badge-select.dim {
+		background-color: var(--bg-elev-2);
+		color: var(--text-dim);
+	}
+	.badge-select:focus {
+		outline: none;
+		box-shadow: 0 0 0 2px var(--accent-soft);
 	}
 	.genre-list,
 	.tag-list {

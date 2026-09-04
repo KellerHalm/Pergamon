@@ -8,6 +8,7 @@
 		READ_CATEGORIES,
 		WATCH_CATEGORIES,
 		STATUSES,
+		RELEASE_STATUSES,
 		NAME_KINDS,
 		CREATOR_ROLES,
 		READ_PROGRESS,
@@ -31,6 +32,7 @@
 	let tags = $state<string[]>([]);
 	let score = $state(0);
 	let status = $state('planned');
+	let releaseStatus = $state('ongoing');
 	let customList = $state('');
 	let progress: Record<string, number> = $state({ volumes: 0, chapters: 0, pages: 0, seasons: 0, episodes: 0, minutes: 0 });
 	let coverUrlInput = $state('');
@@ -106,6 +108,7 @@
 				tags: tags.filter((t) => t.trim()),
 				score,
 				status,
+				releaseStatus,
 				customList,
 				progress: {
 					volumes: progress.volumes,
@@ -113,7 +116,9 @@
 					pages: progress.pages,
 					seasons: progress.seasons,
 					episodes: progress.episodes,
-					minutes: progress.minutes
+					minutes: progress.minutes,
+					totalChapters: progress.totalChapters,
+					totalEpisodes: progress.totalEpisodes
 				},
 				notes: '',
 				spineColor: '',
@@ -255,11 +260,18 @@
 				<input type="number" class="input" min="0" max="5" step="0.5" bind:value={score} />
 			</div>
 			<div class="field">
-				<span class="label">Статус</span>
+				<span class="label">Мой статус</span>
 				<select class="select" bind:value={status}>
 					{#each STATUSES as s}<option value={s.id}>{s.label}</option>{/each}
 				</select>
 			</div>
+		</div>
+
+		<div class="field">
+			<span class="label">Статус тайтла</span>
+			<select class="select" bind:value={releaseStatus}>
+				{#each RELEASE_STATUSES as s}<option value={s.id}>{s.label}</option>{/each}
+			</select>
 		</div>
 
 		{#if typeShelves.length > 0}
@@ -290,6 +302,17 @@
 						</div>
 					</div>
 				{/each}
+				{#if type === 'read'}
+					<div class="prog-item">
+						<span class="prog-label">Вышло глав</span>
+						<input type="number" class="input sm" min="0" bind:value={progress.totalChapters} />
+					</div>
+				{:else}
+					<div class="prog-item">
+						<span class="prog-label">Вышло серий</span>
+						<input type="number" class="input sm" min="0" bind:value={progress.totalEpisodes} />
+					</div>
+				{/if}
 			</div>
 		</div>
 

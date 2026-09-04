@@ -131,7 +131,7 @@
 				</div>
 			</div>
 			<div class="filter-group">
-				<span class="label">Статус</span>
+				<span class="label">Мой статус</span>
 				<div class="chips">
 					<button class="chip" class:active={statusFilter === ''} onclick={() => setFilter('status', '')}>Все</button>
 					{#each STATUSES as s}
