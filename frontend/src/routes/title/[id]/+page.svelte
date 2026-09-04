@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import RichEditor from '$lib/components/RichEditor.svelte';
 	import { titlesApi, coverApi, shelvesApi } from '$lib/api';
 	import {
@@ -39,6 +39,9 @@
 	let notesHtml = $state('');
 	let thumbUrls = $state<Record<string, string>>({});
 	let lightboxIdx = $state(-1);
+	let stripEl = $state<HTMLElement | null>(null);
+	let stripCanLeft = $state(false);
+	let stripCanRight = $state(false);
 
 	let editTitle = $state<any>(null);
 	let shelves = $state<Shelf[]>([]);
@@ -78,6 +81,8 @@
 			}
 		}
 		loading = false;
+		await tick();
+		updateStripArrows();
 	}
 
 	async function ensureThumb(file: string) {
@@ -89,6 +94,19 @@
 	function lbStep(dir: number) {
 		if (!title || title.images.length === 0) return;
 		lightboxIdx = (lightboxIdx + dir + title.images.length) % title.images.length;
+	}
+
+	function updateStripArrows() {
+		const el = stripEl;
+		if (!el) return;
+		stripCanLeft = el.scrollLeft > 4;
+		stripCanRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 4;
+	}
+
+	function scrollStrip(dir: number) {
+		const el = stripEl;
+		if (!el) return;
+		el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
 	}
 
 	async function adjustProgress(field: string, delta: number) {
@@ -596,12 +614,21 @@
 			{#if title.images.length > 0}
 				<section class="section">
 					<h3>Изображения</h3>
-					<button class="gallery-main" onclick={() => (lightboxIdx = 0)}>
-						<img src={thumbUrls[title.images[0]]} alt="" />
-						{#if title.images.length > 1}
-							<span class="gallery-count">+{title.images.length - 1}</span>
-						{/if}
-					</button>
+					<div class="strip">
+						<button class="strip-arrow" class:off={!stripCanLeft} aria-label="Прокрутить влево" onclick={() => scrollStrip(-1)}>
+							<ChevronLeft size={18} />
+						</button>
+						<div class="strip-row" bind:this={stripEl} onscroll={updateStripArrows}>
+							{#each title.images as f, i}
+								<button class="strip-thumb" onclick={() => (lightboxIdx = i)}>
+									<img src={thumbUrls[f]} alt="" />
+								</button>
+							{/each}
+						</div>
+						<button class="strip-arrow" class:off={!stripCanRight} aria-label="Прокрутить вправо" onclick={() => scrollStrip(1)}>
+							<ChevronRight size={18} />
+						</button>
+					</div>
 				</section>
 			{/if}
 
@@ -803,9 +830,42 @@
 		font-size: 14px;
 	}
 
-	.gallery-main {
-		position: relative;
-		display: block;
+	.strip {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.strip-arrow {
+		flex: none;
+		width: 34px;
+		height: 34px;
+		border-radius: 50%;
+		border: 1px solid var(--border);
+		background: var(--bg-elev);
+		color: var(--text-dim);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+	}
+	.strip-arrow:hover {
+		color: var(--text);
+		background: var(--bg-elev-2);
+	}
+	.strip-arrow.off {
+		visibility: hidden;
+	}
+	.strip-row {
+		display: flex;
+		gap: 8px;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+	.strip-row::-webkit-scrollbar {
+		display: none;
+	}
+	.strip-thumb {
+		flex: none;
 		padding: 0;
 		border: 1px solid var(--border);
 		border-radius: var(--radius-sm);
@@ -813,21 +873,11 @@
 		cursor: zoom-in;
 		background: var(--bg-elev);
 	}
-	.gallery-main img {
+	.strip-thumb img {
 		display: block;
-		max-width: 100%;
-		max-height: 420px;
-	}
-	.gallery-count {
-		position: absolute;
-		right: 10px;
-		bottom: 10px;
-		background: rgba(0, 0, 0, 0.65);
-		color: #fff;
-		font-size: 12px;
-		font-weight: 600;
-		padding: 3px 10px;
-		border-radius: 99px;
+		width: 90px;
+		height: 120px;
+		object-fit: cover;
 	}
 	.lightbox {
 		position: fixed;
