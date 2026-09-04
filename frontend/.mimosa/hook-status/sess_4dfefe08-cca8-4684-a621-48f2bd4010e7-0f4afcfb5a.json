@@ -1,10 +1,10 @@
 {
   "schemaVersion": "mimosa-hook-status/v1",
-  "recordedAt": "2026-09-03T16:03:18.616Z",
+  "recordedAt": "2026-09-04T12:49:44.723Z",
   "sessionId": "sess_4dfefe08-cca8-4684-a621-48f2bd4010e7",
   "event": "PostToolUse",
   "toolName": "Edit",
-  "file": "src/routes/add/+page.svelte",
+  "file": "src/routes/title/[id]/+page.svelte",
   "outcome": "clear",
   "coverage": "complete",
   "findingCount": 0,

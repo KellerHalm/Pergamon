@@ -14,7 +14,9 @@
 		CREATOR_ROLES,
 		READ_PROGRESS,
 		WATCH_PROGRESS,
+		statusLabel,
 		statusColor,
+		releaseStatusLabel,
 		categoryLabel,
 		typeLabel,
 		progressForType
@@ -36,6 +38,7 @@
 	let shelves = $state<Shelf[]>([]);
 	let editShelfId = $state(0);
 	let editShelfInitial = $state(0);
+	let statusMenu = $state('');
 	let notesTimer: any;
 
 	const id = $derived(Number($page.params.id));
@@ -74,6 +77,13 @@
 	async function saveStatuses() {
 		if (!title) return;
 		await titlesApi.save({ ...title });
+	}
+
+	function pickStatus(field: 'status' | 'releaseStatus', value: string) {
+		if (!title) return;
+		title[field] = value;
+		statusMenu = '';
+		saveStatuses();
 	}
 
 	async function saveNotes(html: string) {
@@ -164,6 +174,11 @@
 		reader.readAsDataURL(file);
 	}
 </script>
+
+<svelte:window
+	onkeydown={(e) => e.key === 'Escape' && (statusMenu = '')}
+	onclick={() => (statusMenu = '')}
+/>
 
 {#if loading}
 	<div class="loading">Загрузка…</div>
@@ -355,18 +370,72 @@
 						</div>
 					{/if}
 					<div class="badges">
-						<select
-							class="badge badge-select"
-							style="background-color:{statusColor(title.status)}22;color:{statusColor(title.status)}"
-							bind:value={title.status}
-							onchange={saveStatuses}
-						>
-							{#each STATUSES as s}<option value={s.id}>{s.label}</option>{/each}
-						</select>
-						<select class="badge badge-select dim" bind:value={title.releaseStatus} onchange={saveStatuses}>
-							<option value="">Не указан</option>
-							{#each RELEASE_STATUSES as s}<option value={s.id}>{s.label}</option>{/each}
-						</select>
+						<div class="badge-menu">
+							<button
+								class="badge"
+								style="background:{statusColor(title.status)}22;color:{statusColor(title.status)}"
+								onclick={(e) => {
+									e.stopPropagation();
+									statusMenu = statusMenu === 'status' ? '' : 'status';
+								}}
+							>
+								{statusLabel(title.status)}
+							</button>
+							{#if statusMenu === 'status'}
+								<div class="menu">
+									{#each STATUSES as s}
+										<button
+											class="menu-item"
+											class:active={title.status === s.id}
+											onclick={(e) => {
+												e.stopPropagation();
+												pickStatus('status', s.id);
+											}}
+										>
+											<span class="dot" style="background:{s.color}"></span>
+											{s.label}
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+						<div class="badge-menu">
+							<button
+								class="badge dim"
+								onclick={(e) => {
+									e.stopPropagation();
+									statusMenu = statusMenu === 'release' ? '' : 'release';
+								}}
+							>
+								{releaseStatusLabel(title.releaseStatus) || 'Не указан'}
+							</button>
+							{#if statusMenu === 'release'}
+								<div class="menu">
+									<button
+										class="menu-item"
+										class:active={title.releaseStatus === ''}
+										onclick={(e) => {
+											e.stopPropagation();
+											pickStatus('releaseStatus', '');
+										}}
+									>
+										Не указан
+									</button>
+									{#each RELEASE_STATUSES as s}
+										<button
+											class="menu-item"
+											class:active={title.releaseStatus === s.id}
+											onclick={(e) => {
+												e.stopPropagation();
+												pickStatus('releaseStatus', s.id);
+											}}
+										>
+											{s.label}
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
 						{#if title.score > 0}
 							<span class="badge score">★ {title.score.toFixed(1)}</span>
 						{/if}
@@ -513,24 +582,46 @@
 		background: var(--bg-elev-2);
 		color: var(--text-dim);
 	}
-	.badge-select {
-		appearance: none;
-		-webkit-appearance: none;
-		border: none;
-		cursor: pointer;
-		font-family: inherit;
-		padding-right: 20px;
-		background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath fill='%23888' d='M0 0h8L4 5z'/%3E%3C/svg%3E");
-		background-repeat: no-repeat;
-		background-position: right 7px center;
+	.badge-menu {
+		position: relative;
 	}
-	.badge-select.dim {
-		background-color: var(--bg-elev-2);
-		color: var(--text-dim);
+	.menu {
+		position: absolute;
+		top: calc(100% + 6px);
+		left: 0;
+		z-index: 20;
+		min-width: 170px;
+		background: var(--bg-elev);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		box-shadow: var(--shadow);
+		padding: 4px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
 	}
-	.badge-select:focus {
-		outline: none;
-		box-shadow: 0 0 0 2px var(--accent-soft);
+	.menu-item {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 6px 10px;
+		border-radius: var(--radius-sm);
+		font-size: 12px;
+		text-align: left;
+		color: var(--text);
+	}
+	.menu-item:hover {
+		background: var(--bg-elev-2);
+	}
+	.menu-item.active {
+		color: var(--accent);
+		font-weight: 600;
+	}
+	.dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		flex: none;
 	}
 	.genre-list,
 	.tag-list {
