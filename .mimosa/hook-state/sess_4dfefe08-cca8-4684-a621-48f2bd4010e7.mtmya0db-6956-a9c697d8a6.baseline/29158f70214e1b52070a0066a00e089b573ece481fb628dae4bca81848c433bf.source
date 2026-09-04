@@ -1,0 +1,96 @@
+export const READ_CATEGORIES = [
+	{ id: 'book', label: 'Книга' },
+	{ id: 'manga', label: 'Манга' },
+	{ id: 'comic', label: 'Комикс' },
+	{ id: 'novel', label: 'Ранобэ' }
+];
+
+export const WATCH_CATEGORIES = [
+	{ id: 'movie', label: 'Фильм' },
+	{ id: 'series', label: 'Сериал' },
+	{ id: 'anime', label: 'Аниме' },
+	{ id: 'cartoon', label: 'Мультфильм' }
+];
+
+export const ALL_CATEGORIES = [...READ_CATEGORIES, ...WATCH_CATEGORIES];
+
+export const TYPES = [
+	{ id: 'read', label: 'Читать' },
+	{ id: 'watch', label: 'Смотреть' }
+];
+
+export const STATUSES = [
+	{ id: 'planned', label: 'Запланировано', color: '#5b9cff' },
+	{ id: 'progress', label: 'В процессе', color: '#f5a623' },
+	{ id: 'done', label: 'Завершено', color: '#34c759' },
+	{ id: 'paused', label: 'Отложено', color: '#8e8e93' },
+	{ id: 'dropped', label: 'Брошено', color: '#ff453a' }
+];
+
+export const RELEASE_STATUSES = [
+	{ id: 'announced', label: 'Анонс' },
+	{ id: 'ongoing', label: 'Онгоинг' },
+	{ id: 'finished', label: 'Закончен' },
+	{ id: 'hiatus', label: 'Заморожен' },
+	{ id: 'cancelled', label: 'Отменён' }
+];
+
+export const NAME_KINDS = [
+	{ id: 'original', label: 'Оригинальное' },
+	{ id: 'english', label: 'Английское' },
+	{ id: 'russian', label: 'Русское' },
+	{ id: 'alt', label: 'Альтернативное' }
+];
+
+export const CREATOR_ROLES = [
+	{ id: 'author', label: 'Автор' },
+	{ id: 'artist', label: 'Художник' },
+	{ id: 'director', label: 'Режиссёр' },
+	{ id: 'studio', label: 'Студия' }
+];
+
+export const READ_PROGRESS = [
+	{ id: 'volumes', label: 'Тома' },
+	{ id: 'chapters', label: 'Главы' },
+	{ id: 'pages', label: 'Страницы' }
+];
+
+export const WATCH_PROGRESS = [
+	{ id: 'seasons', label: 'Сезоны' },
+	{ id: 'episodes', label: 'Серии' },
+	{ id: 'minutes', label: 'Минуты' }
+];
+
+export const ACCENTS = ['#7c5cff', '#ff5c8a', '#00b894', '#0984e3', '#e17055', '#fdcb6e', '#6c5ce7', '#e84393'];
+
+export function categoryLabel(id: string): string {
+	return ALL_CATEGORIES.find((c) => c.id === id)?.label || id;
+}
+
+export function statusLabel(id: string): string {
+	return STATUSES.find((s) => s.id === id)?.label || id;
+}
+
+export function releaseStatusLabel(id: string): string {
+	return RELEASE_STATUSES.find((s) => s.id === id)?.label || '';
+}
+
+export function statusColor(id: string): string {
+	return STATUSES.find((s) => s.id === id)?.color || '#8e8e93';
+}
+
+export function typeLabel(id: string): string {
+	return TYPES.find((t) => t.id === id)?.label || id;
+}
+
+export function displayName(names: { kind: string; value: string }[]): string {
+	if (!names || names.length === 0) return 'Без названия';
+	const ru = names.find((n) => n.kind === 'russian');
+	const en = names.find((n) => n.kind === 'english');
+	const orig = names.find((n) => n.kind === 'original');
+	return (ru || en || orig || names[0]).value;
+}
+
+export function progressForType(type: string): { id: string; label: string }[] {
+	return type === 'watch' ? WATCH_PROGRESS : READ_PROGRESS;
+}
