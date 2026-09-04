@@ -61,6 +61,7 @@ export interface Title {
 	category: string;
 	names: Name[];
 	cover: string;
+	images: string[];
 	synopsis: string;
 	creators: Creator[];
 	genres: string[];

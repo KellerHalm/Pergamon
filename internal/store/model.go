@@ -32,6 +32,7 @@ type Title struct {
 	Category   string    `json:"category"`
 	Names      []Name    `json:"names"`
 	Cover      string    `json:"cover"`
+	Images     []string  `json:"images"`
 	Synopsis   string    `json:"synopsis"`
 	Creators   []Creator `json:"creators"`
 	Genres     []string  `json:"genres"`
@@ -133,7 +134,7 @@ func (s *Store) ListTitles(f ListFilter) ([]Title, error) {
 }
 
 func (s *Store) GetTitle(id int64) (*Title, error) {
-	t := &Title{Names: []Name{}, Creators: []Creator{}, Genres: []string{}, Tags: []string{}}
+	t := &Title{Names: []Name{}, Creators: []Creator{}, Genres: []string{}, Tags: []string{}, Images: []string{}}
 	err := s.db.QueryRow(`SELECT id,type,category,cover,synopsis,score,status,release_status,custom_list,
 			progress_volumes,progress_chapters,progress_pages,progress_seasons,progress_episodes,progress_minutes,
 			progress_total_chapters,progress_total_episodes,
@@ -201,6 +202,20 @@ func (s *Store) GetTitle(id int64) (*Title, error) {
 		t.Tags = append(t.Tags, tg)
 	}
 	tRows.Close()
+
+	iRows, err := s.db.Query(`SELECT file FROM title_images WHERE title_id=? ORDER BY position, id`, id)
+	if err != nil {
+		return nil, err
+	}
+	for iRows.Next() {
+		var f string
+		if err := iRows.Scan(&f); err != nil {
+			iRows.Close()
+			return nil, err
+		}
+		t.Images = append(t.Images, f)
+	}
+	iRows.Close()
 
 	return t, nil
 }
@@ -285,6 +300,18 @@ func (s *Store) SaveTitle(t Title) (int64, error) {
 			continue
 		}
 		if _, err := tx.Exec(`INSERT OR IGNORE INTO title_tags(title_id,tag) VALUES(?,?)`, t.ID, tg); err != nil {
+			return 0, err
+		}
+	}
+	if _, err := tx.Exec(`DELETE FROM title_images WHERE title_id=?`, t.ID); err != nil {
+		return 0, err
+	}
+	for i, f := range t.Images {
+		f = strings.TrimSpace(f)
+		if f == "" {
+			continue
+		}
+		if _, err := tx.Exec(`INSERT INTO title_images(title_id,file,position) VALUES(?,?,?)`, t.ID, f, i); err != nil {
 			return 0, err
 		}
 	}

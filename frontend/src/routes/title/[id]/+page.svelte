@@ -28,12 +28,17 @@
 	import Plus from 'lucide-svelte/icons/plus';
 	import Minus from 'lucide-svelte/icons/minus';
 	import Edit from 'lucide-svelte/icons/pencil';
+	import X from 'lucide-svelte/icons/x';
+	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 
 	let title = $state<Title | null>(null);
 	let loading = $state(true);
 	let editing = $state(false);
 	let coverUrl = $state('');
 	let notesHtml = $state('');
+	let thumbUrls = $state<Record<string, string>>({});
+	let lightboxIdx = $state(-1);
 
 	let editTitle = $state<any>(null);
 	let shelves = $state<Shelf[]>([]);
@@ -68,8 +73,22 @@
 			if (title.cover) {
 				coverUrl = await coverApi.dataURL(title.cover);
 			}
+			for (const f of title.images || []) {
+				await ensureThumb(f);
+			}
 		}
 		loading = false;
+	}
+
+	async function ensureThumb(file: string) {
+		if (thumbUrls[file] !== undefined) return;
+		thumbUrls[file] = '';
+		thumbUrls[file] = await coverApi.dataURL(file);
+	}
+
+	function lbStep(dir: number) {
+		if (!title || title.images.length === 0) return;
+		lightboxIdx = (lightboxIdx + dir + title.images.length) % title.images.length;
 	}
 
 	async function adjustProgress(field: string, delta: number) {
@@ -109,8 +128,12 @@
 		editTitle = JSON.parse(JSON.stringify(title));
 		editTitle.names = [...editTitle.names];
 		editTitle.creators = [...editTitle.creators];
+		editTitle.images = [...(editTitle.images || [])];
 		editTitle.genres = [...editTitle.genres];
 		editTitle.tags = [...editTitle.tags];
+		for (const f of editTitle.images) {
+			await ensureThumb(f);
+		}
 		shelves = (await shelvesApi.list()) || [];
 		editShelfId = shelves.find((s) => s.titleIds.includes(id))?.id ?? 0;
 		editShelfInitial = editShelfId;
@@ -182,10 +205,49 @@
 		};
 		reader.readAsDataURL(file);
 	}
+
+	async function onImagesInput(e: Event) {
+		const input = e.target as HTMLInputElement;
+		const files = Array.from(input.files ?? []);
+		input.value = '';
+		for (const file of files) {
+			const dataUrl = await new Promise<string>((resolve) => {
+				const reader = new FileReader();
+				reader.onload = () => resolve(reader.result as string);
+				reader.readAsDataURL(file);
+			});
+			const name = await coverApi.uploadDataURL(dataUrl);
+			if (name && !editTitle.images.includes(name)) {
+				editTitle.images.push(name);
+				thumbUrls[name] = dataUrl;
+			}
+		}
+	}
+
+	function removeImage(i: number) {
+		editTitle.images.splice(i, 1);
+	}
+
+	function moveImage(i: number, dir: number) {
+		const j = i + dir;
+		if (j < 0 || j >= editTitle.images.length) return;
+		const f = editTitle.images[i];
+		editTitle.images[i] = editTitle.images[j];
+		editTitle.images[j] = f;
+	}
 </script>
 
 <svelte:window
-	onkeydown={(e) => e.key === 'Escape' && (statusMenu = '')}
+	onkeydown={(e) => {
+		if (e.key === 'Escape') {
+			statusMenu = '';
+			lightboxIdx = -1;
+		} else if (e.key === 'ArrowLeft' && lightboxIdx >= 0) {
+			lbStep(-1);
+		} else if (e.key === 'ArrowRight' && lightboxIdx >= 0) {
+			lbStep(1);
+		}
+	}}
 	onclick={() => (statusMenu = '')}
 />
 
@@ -248,6 +310,29 @@
 						{#if coverUrl}<img src={coverUrl} alt="" />{/if}
 						<input type="file" accept="image/*" onchange={onCoverInput} />
 					</div>
+				</div>
+
+				<div class="field">
+					<span class="label">Изображения</span>
+					{#if e.images.length > 0}
+						<div class="gallery-edit">
+							{#each e.images as f, i}
+								<div class="gallery-thumb">
+									<img src={thumbUrls[f]} alt="" />
+									<div class="thumb-actions">
+										{#if i > 0}
+											<button class="btn btn-icon sm" onclick={() => moveImage(i, -1)}><ChevronLeft size={13} /></button>
+										{/if}
+										{#if i < e.images.length - 1}
+											<button class="btn btn-icon sm" onclick={() => moveImage(i, 1)}><ChevronRight size={13} /></button>
+										{/if}
+										<button class="btn btn-icon sm" onclick={() => removeImage(i)}><X size={13} /></button>
+									</div>
+								</div>
+							{/each}
+						</div>
+					{/if}
+					<input type="file" accept="image/*" multiple onchange={onImagesInput} />
 				</div>
 
 				<div class="field">
@@ -508,6 +593,18 @@
 				</section>
 			{/if}
 
+			{#if title.images.length > 0}
+				<section class="section">
+					<h3>Изображения</h3>
+					<button class="gallery-main" onclick={() => (lightboxIdx = 0)}>
+						<img src={thumbUrls[title.images[0]]} alt="" />
+						{#if title.images.length > 1}
+							<span class="gallery-count">+{title.images.length - 1}</span>
+						{/if}
+					</button>
+				</section>
+			{/if}
+
 				<section class="section">
 					<h3>Прогресс</h3>
 					<div class="progress-grid">
@@ -547,6 +644,19 @@
 				<h3>Заметки</h3>
 				<RichEditor content={notesHtml} onUpdate={saveNotes} />
 			</section>
+
+			{#if lightboxIdx >= 0 && title}
+				<div class="lightbox">
+					<button class="lb-backdrop" aria-label="Закрыть" onclick={() => (lightboxIdx = -1)}></button>
+					<img class="lb-img" src={thumbUrls[title.images[lightboxIdx]]} alt="" />
+					{#if title.images.length > 1}
+						<button class="lb-arrow lb-prev" aria-label="Предыдущее" onclick={() => lbStep(-1)}><ChevronLeft size={26} /></button>
+						<button class="lb-arrow lb-next" aria-label="Следующее" onclick={() => lbStep(1)}><ChevronRight size={26} /></button>
+						<span class="lb-counter">{lightboxIdx + 1} / {title.images.length}</span>
+					{/if}
+					<button class="lb-close" aria-label="Закрыть" onclick={() => (lightboxIdx = -1)}><X size={18} /></button>
+				</div>
+			{/if}
 		{/if}
 	</div>
 {/if}
@@ -691,6 +801,130 @@
 		color: var(--text-dim);
 		line-height: 1.6;
 		font-size: 14px;
+	}
+
+	.gallery-main {
+		position: relative;
+		display: block;
+		padding: 0;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+		cursor: zoom-in;
+		background: var(--bg-elev);
+	}
+	.gallery-main img {
+		display: block;
+		max-width: 100%;
+		max-height: 420px;
+	}
+	.gallery-count {
+		position: absolute;
+		right: 10px;
+		bottom: 10px;
+		background: rgba(0, 0, 0, 0.65);
+		color: #fff;
+		font-size: 12px;
+		font-weight: 600;
+		padding: 3px 10px;
+		border-radius: 99px;
+	}
+	.lightbox {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.88);
+		z-index: 100;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.lb-backdrop {
+		position: absolute;
+		inset: 0;
+		background: transparent;
+		border: none;
+		padding: 0;
+		cursor: zoom-out;
+	}
+	.lb-img {
+		position: relative;
+		max-width: 88vw;
+		max-height: 86vh;
+		border-radius: var(--radius);
+		box-shadow: var(--shadow);
+		pointer-events: none;
+	}
+	.lb-arrow {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 46px;
+		height: 46px;
+		border-radius: 50%;
+		border: none;
+		background: rgba(0, 0, 0, 0.55);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+	}
+	.lb-arrow:hover {
+		background: rgba(0, 0, 0, 0.8);
+	}
+	.lb-prev {
+		left: 18px;
+	}
+	.lb-next {
+		right: 18px;
+	}
+	.lb-close {
+		position: absolute;
+		top: 16px;
+		right: 16px;
+		width: 38px;
+		height: 38px;
+		border-radius: 50%;
+		border: none;
+		background: rgba(0, 0, 0, 0.55);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+	}
+	.lb-counter {
+		position: absolute;
+		bottom: 18px;
+		left: 50%;
+		transform: translateX(-50%);
+		background: rgba(0, 0, 0, 0.55);
+		color: #fff;
+		font-size: 13px;
+		padding: 4px 12px;
+		border-radius: 99px;
+	}
+	.gallery-edit {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+		margin-bottom: 8px;
+	}
+	.gallery-thumb {
+		width: 84px;
+	}
+	.gallery-thumb img {
+		width: 84px;
+		height: 112px;
+		object-fit: cover;
+		display: block;
+		border-radius: 6px;
+		border: 1px solid var(--border);
+	}
+	.thumb-actions {
+		display: flex;
+		gap: 2px;
+		margin-top: 4px;
 	}
 
 	.progress-grid {

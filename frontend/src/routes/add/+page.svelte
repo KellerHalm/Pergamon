@@ -20,12 +20,18 @@
 	import Minus from 'lucide-svelte/icons/minus';
 	import ImagePlus from 'lucide-svelte/icons/image-plus';
 	import Link from 'lucide-svelte/icons/link';
+	import X from 'lucide-svelte/icons/x';
+	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 
 	let type = $state('read');
 	let category = $state('book');
 	let names = $state([{ kind: 'original', value: '' }]);
 	let cover = $state('');
 	let coverUrl = $state('');
+	let images = $state<string[]>([]);
+	let imageUrls = $state<Record<string, string>>({});
+	let imagesUploading = $state(false);
 	let synopsis = $state('');
 	let creators = $state<{ role: string; name: string }[]>([]);
 	let genres = $state<string[]>([]);
@@ -87,6 +93,39 @@
 		coverUploading = false;
 	}
 
+	async function onImagesInput(e: Event) {
+		const input = e.target as HTMLInputElement;
+		const files = Array.from(input.files ?? []);
+		input.value = '';
+		if (files.length === 0) return;
+		imagesUploading = true;
+		for (const file of files) {
+			const dataUrl = await new Promise<string>((resolve) => {
+				const reader = new FileReader();
+				reader.onload = () => resolve(reader.result as string);
+				reader.readAsDataURL(file);
+			});
+			const name = await coverApi.uploadDataURL(dataUrl);
+			if (name && !images.includes(name)) {
+				images.push(name);
+				imageUrls[name] = dataUrl;
+			}
+		}
+		imagesUploading = false;
+	}
+
+	function removeImage(i: number) {
+		images.splice(i, 1);
+	}
+
+	function moveImage(i: number, dir: number) {
+		const j = i + dir;
+		if (j < 0 || j >= images.length) return;
+		const f = images[i];
+		images[i] = images[j];
+		images[j] = f;
+	}
+
 	async function save() {
 		const hasName = names.some((n) => n.value.trim() !== '');
 		if (!hasName) {
@@ -102,6 +141,7 @@
 				category,
 				names: names.filter((n) => n.value.trim()),
 				cover,
+				images: [...images],
 				synopsis,
 				creators: creators.filter((c) => c.name.trim()),
 				genres: genres.filter((g) => g.trim()),
@@ -210,6 +250,33 @@
 					</div>
 				</div>
 			</div>
+		</div>
+
+		<div class="field">
+			<span class="label">Изображения</span>
+			{#if images.length > 0}
+				<div class="gallery-edit">
+					{#each images as f, i}
+						<div class="gallery-thumb">
+							<img src={imageUrls[f]} alt="" />
+							<div class="thumb-actions">
+								{#if i > 0}
+									<button class="btn btn-icon sm" onclick={() => moveImage(i, -1)}><ChevronLeft size={13} /></button>
+								{/if}
+								{#if i < images.length - 1}
+									<button class="btn btn-icon sm" onclick={() => moveImage(i, 1)}><ChevronRight size={13} /></button>
+								{/if}
+								<button class="btn btn-icon sm" onclick={() => removeImage(i)}><X size={13} /></button>
+							</div>
+						</div>
+					{/each}
+				</div>
+			{/if}
+			<label class="btn sm">
+				<ImagePlus size={14} />
+				{imagesUploading ? 'Загрузка…' : 'Добавить изображения'}
+				<input type="file" accept="image/*" multiple hidden onchange={onImagesInput} />
+			</label>
 		</div>
 
 		<div class="field">
@@ -415,6 +482,29 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
+	}
+
+	.gallery-edit {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+		margin-bottom: 8px;
+	}
+	.gallery-thumb {
+		width: 84px;
+	}
+	.gallery-thumb img {
+		width: 84px;
+		height: 112px;
+		object-fit: cover;
+		display: block;
+		border-radius: 6px;
+		border: 1px solid var(--border);
+	}
+	.thumb-actions {
+		display: flex;
+		gap: 2px;
+		margin-top: 4px;
 	}
 
 	.progress-fields {

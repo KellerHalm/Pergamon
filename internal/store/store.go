@@ -74,6 +74,12 @@ func (s *Store) migrate() error {
 			tag TEXT NOT NULL,
 			PRIMARY KEY (title_id, tag)
 		)`,
+		`CREATE TABLE IF NOT EXISTS title_images (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			title_id INTEGER NOT NULL REFERENCES titles(id) ON DELETE CASCADE,
+			file TEXT NOT NULL,
+			position INTEGER NOT NULL DEFAULT 0
+		)`,
 		`CREATE TABLE IF NOT EXISTS shelves (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
@@ -98,6 +104,7 @@ func (s *Store) migrate() error {
 		`CREATE INDEX IF NOT EXISTS idx_title_names_value ON title_names(value)`,
 		`CREATE INDEX IF NOT EXISTS idx_title_creators_name ON title_creators(name)`,
 		`CREATE INDEX IF NOT EXISTS idx_title_tags_tag ON title_tags(tag)`,
+		`CREATE INDEX IF NOT EXISTS idx_title_images_title ON title_images(title_id)`,
 	}
 	for _, st := range stmts {
 		if _, err := s.db.Exec(st); err != nil {
