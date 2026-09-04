@@ -44,6 +44,7 @@
 
 	const id = $derived(Number($page.params.id));
 	const editShelfOptions = $derived(shelves.filter((s) => s.kind === (title?.type ?? '')));
+	const SCORES = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
 
 	$effect(() => {
 		if (!editTitle) return;
@@ -85,6 +86,13 @@
 		title[field] = value;
 		statusMenu = '';
 		saveStatuses();
+	}
+
+	async function pickScore(value: number) {
+		if (!title) return;
+		title.score = value;
+		statusMenu = '';
+		await saveStatuses();
 	}
 
 	async function saveNotes(html: string) {
@@ -440,9 +448,45 @@
 									</div>
 								{/if}
 							</div>
-						{#if title.score > 0}
-							<span class="badge score">★ {title.score.toFixed(1)}</span>
-						{/if}
+						<div class="badge-menu">
+							<button
+								class="badge"
+								class:score={title.score > 0}
+								class:dim={!(title.score > 0)}
+								onclick={(e) => {
+									e.stopPropagation();
+									statusMenu = statusMenu === 'score' ? '' : 'score';
+								}}
+							>
+								{#if title.score > 0}★ {title.score.toFixed(1)}{:else}☆ Оценка{/if}
+							</button>
+							{#if statusMenu === 'score'}
+								<div class="menu">
+									<button
+										class="menu-item"
+										class:active={!(title.score > 0)}
+										onclick={(e) => {
+											e.stopPropagation();
+											pickScore(0);
+										}}
+									>
+										☆ Не указана
+									</button>
+									{#each SCORES as v}
+										<button
+											class="menu-item"
+											class:active={title.score === v}
+											onclick={(e) => {
+												e.stopPropagation();
+												pickScore(v);
+											}}
+										>
+											★ {v.toFixed(1)}
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
 					</div>
 					{#if title.genres.length > 0}
 						<div class="genre-list">
