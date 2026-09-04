@@ -1,6 +1,0 @@
-
-
-export const index = 2;
-export const imports = ["_app/immutable/nodes/2.sambqz-6.js","_app/immutable/chunks/Dw-lMHZb.js","_app/immutable/chunks/__a6zYIM.js","_app/immutable/chunks/D1vuizLs.js","_app/immutable/chunks/CUs4AY0N.js","_app/immutable/chunks/0HPzfMBt.js","_app/immutable/chunks/CzOl_Vd_.js"];
-export const stylesheets = ["_app/immutable/assets/2.BUsc0NRC.css"];
-export const fonts = [];
