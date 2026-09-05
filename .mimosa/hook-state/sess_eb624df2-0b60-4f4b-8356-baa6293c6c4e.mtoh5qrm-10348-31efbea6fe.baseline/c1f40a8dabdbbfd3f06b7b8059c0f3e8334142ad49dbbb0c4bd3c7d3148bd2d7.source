@@ -1,0 +1,6 @@
+import{c as i,a as p}from"./Bx9M552n.js";import{I as c,s as m}from"./8Qi90tmG.js";import{f as d}from"./Dud9Vawm.js";import{l,s as f}from"./Co52bdsS.js";function v(t,s){const r=l(s,["children","$$slots","$$events","$$legacy"]);/**
+ * @license lucide-svelte v0.460.1 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const e=[["path",{d:"M5 12h14"}]];c(t,f({name:"minus"},()=>r,{get iconNode(){return e},children:(a,$)=>{var o=i(),n=d(o);m(n,s,"default",{}),p(a,o)},$$slots:{default:!0}}))}export{v as M};
