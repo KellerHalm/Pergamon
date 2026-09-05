@@ -1,4 +1,4 @@
-import type { ListQuery, Shelf, SyncResult, Title, WebDAVConfig } from '../app.d';
+import type { ListQuery, Note, Shelf, SyncResult, Title, WebDAVConfig } from '../app.d';
 
 const api = () => window.go.main.App;
 
@@ -8,6 +8,12 @@ export const titlesApi = {
 	save: (t: Title) => api().SaveTitle(t),
 	delete: (id: number) => api().DeleteTitle(id),
 	adjustProgress: (id: number, field: string, delta: number) => api().AdjustProgress(id, field, delta)
+};
+
+export const notesApi = {
+	list: (titleId: number) => api().ListNotes(titleId) as Promise<Note[]>,
+	save: (n: Note) => api().SaveNote(n),
+	delete: (id: number) => api().DeleteNote(id)
 };
 
 export const metaApi = {

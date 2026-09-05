@@ -85,8 +85,8 @@ export interface Note {
 	titleId: number;
 	heading: string;
 	content: string;
-	createdAt?: string;
-	updatedAt?: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface Shelf {

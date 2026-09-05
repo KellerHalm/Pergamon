@@ -100,6 +100,18 @@ func (a *App) AdjustProgress(id int64, field string, delta int) (*store.Title, e
 	return a.store.GetTitle(id)
 }
 
+func (a *App) ListNotes(titleID int64) ([]store.Note, error) {
+	return a.store.ListNotes(titleID)
+}
+
+func (a *App) SaveNote(n store.Note) (int64, error) {
+	return a.store.SaveNote(n)
+}
+
+func (a *App) DeleteNote(id int64) error {
+	return a.store.DeleteNote(id)
+}
+
 func (a *App) AllTags() ([]string, error) {
 	return a.store.AllTags()
 }

@@ -93,6 +93,14 @@ func (s *Store) migrate() error {
 			position INTEGER NOT NULL DEFAULT 0,
 			PRIMARY KEY (shelf_id, title_id)
 		)`,
+		`CREATE TABLE IF NOT EXISTS title_notes (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			title_id INTEGER NOT NULL REFERENCES titles(id) ON DELETE CASCADE,
+			heading TEXT DEFAULT '',
+			content TEXT DEFAULT '',
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
 		`CREATE TABLE IF NOT EXISTS settings (
 			key TEXT PRIMARY KEY,
 			value TEXT NOT NULL DEFAULT ''
@@ -105,6 +113,7 @@ func (s *Store) migrate() error {
 		`CREATE INDEX IF NOT EXISTS idx_title_creators_name ON title_creators(name)`,
 		`CREATE INDEX IF NOT EXISTS idx_title_tags_tag ON title_tags(tag)`,
 		`CREATE INDEX IF NOT EXISTS idx_title_images_title ON title_images(title_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_title_notes_title ON title_notes(title_id)`,
 	}
 	for _, st := range stmts {
 		if _, err := s.db.Exec(st); err != nil {
@@ -118,6 +127,13 @@ func (s *Store) migrate() error {
 		return err
 	}
 	if err := s.addColumnIfMissing("titles", "progress_total_episodes", "INTEGER NOT NULL DEFAULT 0"); err != nil {
+		return err
+	}
+	if _, err := s.db.Exec(`INSERT INTO title_notes(title_id, heading, content)
+		SELECT id, 'Заметки', notes FROM titles WHERE TRIM(notes) != ''`); err != nil {
+		return err
+	}
+	if _, err := s.db.Exec(`UPDATE titles SET notes='' WHERE TRIM(notes) != ''`); err != nil {
 		return err
 	}
 	return nil

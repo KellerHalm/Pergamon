@@ -1,0 +1,252 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20260905T090547557Z-10024-76c3525a74bb",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "candidate-select",
+      "target": "cmd/notes_smoke/main.go",
+      "reason": "changed_file_unreadable: observed changed file no longer exists or cannot be read"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": true,
+      "captured_files": 114,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 0,
+      "compensated_target_count": 6
+    },
+    "change_tracking": {
+      "touched_observed": 7,
+      "touched_retained": 7,
+      "truncated": false,
+      "bash_mutation": false,
+      "bash_discovered": 0,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": false
+    },
+    "candidates": {
+      "eligible_files": 6,
+      "selected_files": 6,
+      "limit": 20,
+      "truncated": false
+    },
+    "scanning": {
+      "required_files": 6,
+      "scanned_files": 6,
+      "skipped_files": 0,
+      "failed_files": 0,
+      "project_checks_required": 0,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "changed_file_unreadable": 1,
+      "project_check_failed": 1
+    },
+    "reasons": [
+      {
+        "code": "changed_file_unreadable",
+        "stage": "candidate-select",
+        "target": "cmd/notes_smoke/main.go",
+        "detail": "observed changed file no longer exists or cannot be read",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "candidate-select",
+        "target": "cmd/notes_smoke/main.go",
+        "detail": "changed_file_unreadable: observed changed file no longer exists or cannot be read",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": false
+  },
+  "generated_at": "2026-09-05T09:05:47.557Z",
+  "session_id": "sess_615a5963-c38e-4f77-91c5-cfd91150b7f7",
+  "target": ".",
+  "revision": "ec3b0a1986c73667e1d000409fb5ece4afbc47da",
+  "rules_version": "unavailable",
+  "diff_hash": "0520c3a3e29da5d98cecfc9a73ef6942b17607df7d24a0e9bf9d449429deb56d",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 6,
+    "changed_files": [
+      {
+        "file": "app.go",
+        "ranges": [
+          {
+            "start": 103,
+            "end": 114
+          }
+        ],
+        "before_hash": "493935d70bd5ad500fad8199f0ddadd4abbe68867c16c4fa7e8a07fdc0aafe0b",
+        "after_hash": "413ea6ff7577d8846574a97c999fcdbae8a2a45f979a1afa7964228f3376eeeb"
+      },
+      {
+        "file": "frontend/src/app.d.ts",
+        "ranges": [
+          {
+            "start": 11,
+            "end": 13
+          },
+          {
+            "start": 83,
+            "end": 91
+          }
+        ],
+        "before_hash": "0cfcc9c1afaf6f1be96e257bda01531343a8c5107fd2ce53cee87c1189f319de",
+        "after_hash": "240580c2c870f21e26ff17843b55c2207c18270f71572d0e972a3fce82bf3f7d"
+      },
+      {
+        "file": "frontend/src/lib/api.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 1
+          },
+          {
+            "start": 13,
+            "end": 18
+          }
+        ],
+        "before_hash": "c0992688c0d20dce7d78310f3fbfaac01dc066f6328e6e52b3649204386d318e",
+        "after_hash": "893d8a610519e07c1ca83461300b45ae8772b1b08729be6ec63177349d86e7b2"
+      },
+      {
+        "file": "internal/store/model.go",
+        "ranges": [
+          {
+            "start": 51,
+            "end": 59
+          },
+          {
+            "start": 336,
+            "end": 390
+          }
+        ],
+        "before_hash": "d38b3b12d2379ece2ab014b9f12caea47b5228cbc77f10ab11944efd5400d739",
+        "after_hash": "985391d94735a171e8c984ef1231c1ab0032a59166640fce699c9620a55d7a50"
+      },
+      {
+        "file": "internal/store/store.go",
+        "ranges": [
+          {
+            "start": 96,
+            "end": 103
+          },
+          {
+            "start": 116,
+            "end": 116
+          },
+          {
+            "start": 131,
+            "end": 137
+          }
+        ],
+        "before_hash": "c8f6ee6e1e231d82a80d96f33b64a71b9c0050331844941c2c5fd904f7fee2a1",
+        "after_hash": "7c111c5dd759e15de199177375ae2e68dbddb2ff40209b871860f9ac49e2c5f4"
+      },
+      {
+        "file": "internal/sync/json.go",
+        "ranges": [
+          {
+            "start": 15,
+            "end": 15
+          },
+          {
+            "start": 27,
+            "end": 30
+          },
+          {
+            "start": 35,
+            "end": 35
+          },
+          {
+            "start": 48,
+            "end": 48
+          },
+          {
+            "start": 50,
+            "end": 50
+          },
+          {
+            "start": 52,
+            "end": 53
+          },
+          {
+            "start": 56,
+            "end": 58
+          },
+          {
+            "start": 69,
+            "end": 77
+          }
+        ],
+        "before_hash": "3196329746d8463138b9935e36910f2653c1f29ab5e753a16f6b5e02b9596226",
+        "after_hash": "ef31798eb492ed75a6361f21a0d060316046e758fad04db815e1e1422b2ed21a"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-09-05T09:05:45.224Z",
+    "completed_at": "2026-09-05T09:05:47.557Z",
+    "duration_ms": 2333,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 2333,
+    "peakMemoryBytes": 146726912,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 6,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-sess_615a5963-c38e-4f77-91c5-cfd91150b7f7-20260905T090547557Z-10024-76c3525a74bb.json",
+    "latest_report": ".mimosa/reports/task-review-sess_615a5963-c38e-4f77-91c5-cfd91150b7f7.json",
+    "history_summary": ".mimosa/history/run-20260905T090547557Z-10024-76c3525a74bb.json"
+  }
+}

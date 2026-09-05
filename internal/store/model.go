@@ -48,6 +48,15 @@ type Title struct {
 	UpdatedAt  string `json:"updatedAt"`
 }
 
+type Note struct {
+	ID        int64  `json:"id"`
+	TitleID   int64  `json:"titleId"`
+	Heading   string `json:"heading"`
+	Content   string `json:"content"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
 type Shelf struct {
 	ID        int64   `json:"id"`
 	Name      string  `json:"name"`
@@ -321,6 +330,61 @@ func (s *Store) SaveTitle(t Title) (int64, error) {
 
 func (s *Store) DeleteTitle(id int64) error {
 	_, err := s.db.Exec(`DELETE FROM titles WHERE id=?`, id)
+	return err
+}
+
+func (s *Store) ListNotes(titleID int64) ([]Note, error) {
+	rows, err := s.db.Query(`SELECT id,title_id,heading,content,created_at,updated_at
+		FROM title_notes WHERE title_id=? ORDER BY created_at DESC, id DESC`, titleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]Note, 0)
+	for rows.Next() {
+		var n Note
+		if err := rows.Scan(&n.ID, &n.TitleID, &n.Heading, &n.Content, &n.CreatedAt, &n.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, n)
+	}
+	return out, rows.Err()
+}
+
+func (s *Store) ListAllNotes() ([]Note, error) {
+	rows, err := s.db.Query(`SELECT id,title_id,heading,content,created_at,updated_at
+		FROM title_notes ORDER BY title_id, id`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]Note, 0)
+	for rows.Next() {
+		var n Note
+		if err := rows.Scan(&n.ID, &n.TitleID, &n.Heading, &n.Content, &n.CreatedAt, &n.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, n)
+	}
+	return out, rows.Err()
+}
+
+func (s *Store) SaveNote(n Note) (int64, error) {
+	if n.ID == 0 {
+		res, err := s.db.Exec(`INSERT INTO title_notes(title_id,heading,content,created_at,updated_at)
+			VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`, n.TitleID, n.Heading, n.Content)
+		if err != nil {
+			return 0, err
+		}
+		return res.LastInsertId()
+	}
+	_, err := s.db.Exec(`UPDATE title_notes SET heading=?,content=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`,
+		n.Heading, n.Content, n.ID)
+	return n.ID, err
+}
+
+func (s *Store) DeleteNote(id int64) error {
+	_, err := s.db.Exec(`DELETE FROM title_notes WHERE id=?`, id)
 	return err
 }
 

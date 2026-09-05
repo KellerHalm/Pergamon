@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount, tick } from 'svelte';
-	import RichEditor from '$lib/components/RichEditor.svelte';
 	import { titlesApi, coverApi, shelvesApi } from '$lib/api';
 	import {
 		STATUSES,
@@ -28,6 +27,7 @@
 	import Plus from 'lucide-svelte/icons/plus';
 	import Minus from 'lucide-svelte/icons/minus';
 	import Edit from 'lucide-svelte/icons/pencil';
+	import NotebookPen from 'lucide-svelte/icons/notebook-pen';
 	import X from 'lucide-svelte/icons/x';
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
@@ -36,7 +36,6 @@
 	let loading = $state(true);
 	let editing = $state(false);
 	let coverUrl = $state('');
-	let notesHtml = $state('');
 	let thumbUrls = $state<Record<string, string>>({});
 	let lightboxIdx = $state(-1);
 	let stripEl = $state<HTMLElement | null>(null);
@@ -48,7 +47,6 @@
 	let editShelfId = $state(0);
 	let editShelfInitial = $state(0);
 	let statusMenu = $state('');
-	let notesTimer: any;
 
 	const id = $derived(Number($page.params.id));
 	const editShelfOptions = $derived(shelves.filter((s) => s.kind === (title?.type ?? '')));
@@ -72,7 +70,6 @@
 		loading = true;
 		title = await titlesApi.get(id);
 		if (title) {
-			notesHtml = title.notes || '';
 			if (title.cover) {
 				coverUrl = await coverApi.dataURL(title.cover);
 			}
@@ -130,16 +127,6 @@
 		title.score = value;
 		statusMenu = '';
 		await saveStatuses();
-	}
-
-	async function saveNotes(html: string) {
-		notesHtml = html;
-		clearTimeout(notesTimer);
-		notesTimer = setTimeout(async () => {
-			if (!title) return;
-			title.notes = html;
-			await titlesApi.save({ ...title });
-		}, 500);
 	}
 
 	async function startEdit() {
@@ -281,6 +268,10 @@
 				Назад
 			</button>
 			<button class="btn" onclick={startEdit}><Edit size={14} /> Редактировать</button>
+			<button class="btn" onclick={() => goto(`/title/${id}/notes`)}>
+				<NotebookPen size={14} />
+				Заметки
+			</button>
 			<button class="btn btn-danger" onclick={deleteTitle}><Trash2 size={14} /> Удалить</button>
 		</div>
 
@@ -666,11 +657,6 @@
 						{/if}
 					</div>
 				</section>
-
-			<section class="section">
-				<h3>Заметки</h3>
-				<RichEditor content={notesHtml} onUpdate={saveNotes} />
-			</section>
 
 			{#if lightboxIdx >= 0 && title}
 				<div class="lightbox">

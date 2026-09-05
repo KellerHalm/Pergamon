@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260905T090547557Z-10024-76c3525a74bb",
+  "runId": "20260905T090547557Z-10024-76c3525a74bb",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "changed_file_unreadable",
+        "stage": "candidate-select",
+        "target": "cmd/notes_smoke/main.go",
+        "detail": "observed changed file no longer exists or cannot be read",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "candidate-select",
+        "target": "cmd/notes_smoke/main.go",
+        "detail": "changed_file_unreadable: observed changed file no longer exists or cannot be read",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "ec3b0a1986c73667e1d000409fb5ece4afbc47da",
+  "diffHash": "0520c3a3e29da5d98cecfc9a73ef6942b17607df7d24a0e9bf9d449429deb56d",
+  "rulesVersion": "unavailable",
+  "sessionHash": "e66ff3563baad2e4cca4a3308a5c498d063ebc563ad6ec428e871027e00522c6",
+  "reportRef": ".mimosa/reports/task-review-sess_615a5963-c38e-4f77-91c5-cfd91150b7f7-20260905T090547557Z-10024-76c3525a74bb.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [
+    {
+      "file": "internal/store/store.go",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "internal/store/model.go",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app.go",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "internal/sync/json.go",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "frontend/src/app.d.ts",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "frontend/src/lib/api.ts",
+      "direct": "complete",
+      "projectContext": "partial"
+    }
+  ],
+  "recordedAt": "2026-09-05T09:05:48.421Z"
+}
