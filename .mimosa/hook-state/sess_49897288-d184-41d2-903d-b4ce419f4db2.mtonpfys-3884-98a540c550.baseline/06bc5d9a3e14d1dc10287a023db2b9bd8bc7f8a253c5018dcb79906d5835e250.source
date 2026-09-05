@@ -1,0 +1,355 @@
+import { d as ensure_array_like, e as escape_html, f as attr, l as derived } from "../../../chunks/index.js";
+import "@sveltejs/kit/internal";
+import "../../../chunks/exports.js";
+import "../../../chunks/utils2.js";
+import "@sveltejs/kit/internal/server";
+import "../../../chunks/root.js";
+import "../../../chunks/state.svelte.js";
+import { d as displayName, T as TYPES, R as READ_CATEGORIES, N as NAME_KINDS, P as PEOPLE_ROLES, S as STATUSES, c as RELEASE_STATUSES, p as progressForType } from "../../../chunks/constants.js";
+import { M as Minus, I as Image_plus, L as Link, C as Chevron_left, a as Chevron_right, X } from "../../../chunks/chevron-right.js";
+import { P as Plus } from "../../../chunks/plus.js";
+function _page($$renderer, $$props) {
+  $$renderer.component(($$renderer2) => {
+    let type = "read";
+    let category = "book";
+    let names = [{ kind: "original", value: "" }];
+    let images = [];
+    let imageUrls = {};
+    let synopsis = "";
+    let studioRows = [];
+    let personRows = [];
+    let genres = [];
+    let tags = [];
+    let score = 0;
+    let status = "planned";
+    let releaseStatus = "ongoing";
+    let customList = "";
+    let progress = {
+      volumes: 0,
+      chapters: 0,
+      pages: 0,
+      seasons: 0,
+      episodes: 0,
+      minutes: 0
+    };
+    let coverUrlInput = "";
+    let coverUploading = false;
+    let saving = false;
+    let shelves = [];
+    let shelfId = 0;
+    let relations = [];
+    let allTitles = [];
+    let charRows = [];
+    let allCharacters = [];
+    let allStudios = [];
+    let allPeople = [];
+    const typeShelves = derived(() => shelves.filter((s) => s.kind === type));
+    function relationCandidates(i) {
+      const picked = relations.map((r, j) => j === i ? 0 : r.relatedId);
+      return allTitles.filter((t) => !picked.includes(t.id));
+    }
+    $$renderer2.push(`<div class="page svelte-j15r9w"><h1 class="svelte-j15r9w">Добавить тайтл</h1> `);
+    {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--> <div class="form svelte-j15r9w"><div class="form-row svelte-j15r9w"><div class="field"><span class="label">Тип</span> `);
+    $$renderer2.select({ class: "select", value: type }, ($$renderer3) => {
+      $$renderer3.push(`<!--[-->`);
+      const each_array = ensure_array_like(TYPES);
+      for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
+        let t = each_array[$$index];
+        $$renderer3.option({ value: t.id }, ($$renderer4) => {
+          $$renderer4.push(`${escape_html(t.label)}`);
+        });
+      }
+      $$renderer3.push(`<!--]-->`);
+    });
+    $$renderer2.push(`</div> <div class="field"><span class="label">Категория</span> `);
+    $$renderer2.select({ class: "select", value: category }, ($$renderer3) => {
+      {
+        $$renderer3.push("<!--[0-->");
+        $$renderer3.push(`<!--[-->`);
+        const each_array_1 = ensure_array_like(READ_CATEGORIES);
+        for (let $$index_1 = 0, $$length = each_array_1.length; $$index_1 < $$length; $$index_1++) {
+          let c = each_array_1[$$index_1];
+          $$renderer3.option({ value: c.id }, ($$renderer4) => {
+            $$renderer4.push(`${escape_html(c.label)}`);
+          });
+        }
+        $$renderer3.push(`<!--]-->`);
+      }
+      $$renderer3.push(`<!--]-->`);
+    });
+    $$renderer2.push(`</div></div> <div class="field"><span class="label">Названия</span> <!--[-->`);
+    const each_array_3 = ensure_array_like(names);
+    for (let i = 0, $$length = each_array_3.length; i < $$length; i++) {
+      let n = each_array_3[i];
+      $$renderer2.push(`<div class="row-2 svelte-j15r9w">`);
+      $$renderer2.select(
+        { class: "select sm", value: n.kind },
+        ($$renderer3) => {
+          $$renderer3.push(`<!--[-->`);
+          const each_array_4 = ensure_array_like(NAME_KINDS);
+          for (let $$index_3 = 0, $$length2 = each_array_4.length; $$index_3 < $$length2; $$index_3++) {
+            let k = each_array_4[$$index_3];
+            $$renderer3.option({ value: k.id }, ($$renderer4) => {
+              $$renderer4.push(`${escape_html(k.label)}`);
+            });
+          }
+          $$renderer3.push(`<!--]-->`);
+        },
+        "svelte-j15r9w"
+      );
+      $$renderer2.push(` <input class="input svelte-j15r9w" placeholder="Название…"${attr("value", n.value)}/> `);
+      if (names.length > 1) {
+        $$renderer2.push("<!--[0-->");
+        $$renderer2.push(`<button class="btn btn-icon sm svelte-j15r9w">`);
+        Minus($$renderer2, { size: 14 });
+        $$renderer2.push(`<!----></button>`);
+      } else {
+        $$renderer2.push("<!--[-1-->");
+      }
+      $$renderer2.push(`<!--]--></div>`);
+    }
+    $$renderer2.push(`<!--]--> <button class="btn sm svelte-j15r9w">`);
+    Plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> Добавить название</button></div> <div class="field"><span class="label">Обложка</span> <div class="cover-area svelte-j15r9w"><div class="cover-preview svelte-j15r9w">`);
+    {
+      $$renderer2.push("<!--[-1-->");
+      $$renderer2.push(`<div class="cover-placeholder svelte-j15r9w">`);
+      Image_plus($$renderer2, { size: 32 });
+      $$renderer2.push(`<!----></div>`);
+    }
+    $$renderer2.push(`<!--]--></div> <div class="cover-actions svelte-j15r9w"><label class="btn">`);
+    Image_plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> ${escape_html("С устройства")} <input type="file" accept="image/*" hidden=""/></label> <div class="row-2 svelte-j15r9w"><input class="input svelte-j15r9w" placeholder="Ссылка на изображение…"${attr("value", coverUrlInput)}/> <button class="btn btn-primary sm svelte-j15r9w"${attr("disabled", coverUploading, true)}>`);
+    Link($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----></button></div></div></div></div> <div class="field"><span class="label">Изображения</span> `);
+    if (images.length > 0) {
+      $$renderer2.push("<!--[0-->");
+      $$renderer2.push(`<div class="gallery-edit svelte-j15r9w"><!--[-->`);
+      const each_array_5 = ensure_array_like(images);
+      for (let i = 0, $$length = each_array_5.length; i < $$length; i++) {
+        let f = each_array_5[i];
+        $$renderer2.push(`<div class="gallery-thumb svelte-j15r9w"><img${attr("src", imageUrls[f])} alt="" class="svelte-j15r9w"/> <div class="thumb-actions svelte-j15r9w">`);
+        if (i > 0) {
+          $$renderer2.push("<!--[0-->");
+          $$renderer2.push(`<button class="btn btn-icon sm svelte-j15r9w">`);
+          Chevron_left($$renderer2, { size: 13 });
+          $$renderer2.push(`<!----></button>`);
+        } else {
+          $$renderer2.push("<!--[-1-->");
+        }
+        $$renderer2.push(`<!--]--> `);
+        if (i < images.length - 1) {
+          $$renderer2.push("<!--[0-->");
+          $$renderer2.push(`<button class="btn btn-icon sm svelte-j15r9w">`);
+          Chevron_right($$renderer2, { size: 13 });
+          $$renderer2.push(`<!----></button>`);
+        } else {
+          $$renderer2.push("<!--[-1-->");
+        }
+        $$renderer2.push(`<!--]--> <button class="btn btn-icon sm svelte-j15r9w">`);
+        X($$renderer2, { size: 13 });
+        $$renderer2.push(`<!----></button></div></div>`);
+      }
+      $$renderer2.push(`<!--]--></div>`);
+    } else {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--> <label class="btn sm svelte-j15r9w">`);
+    Image_plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> ${escape_html("Добавить изображения")} <input type="file" accept="image/*" multiple="" hidden=""/></label></div> <div class="field"><span class="label">Описание</span> <textarea class="textarea"${attr("rows", 4)} placeholder="Сюжет, синопсис…">`);
+    const $$body = escape_html(synopsis);
+    if ($$body) {
+      $$renderer2.push(`${$$body}`);
+    }
+    $$renderer2.push(`</textarea></div> <div class="field"><span class="label">Студии</span> <!--[-->`);
+    const each_array_6 = ensure_array_like(studioRows);
+    for (let i = 0, $$length = each_array_6.length; i < $$length; i++) {
+      let s = each_array_6[i];
+      $$renderer2.push(`<div class="row-2 svelte-j15r9w"><input class="input svelte-j15r9w" list="studio-options" placeholder="Название студии…"${attr("value", s.name)}/> <button class="btn btn-icon sm svelte-j15r9w">`);
+      Minus($$renderer2, { size: 14 });
+      $$renderer2.push(`<!----></button></div>`);
+    }
+    $$renderer2.push(`<!--]--> <button class="btn sm svelte-j15r9w">`);
+    Plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> Добавить студию</button> <span class="rel-hint svelte-j15r9w">Выберите студию из списка или введите новое название — она создастся автоматически.</span> <datalist id="studio-options"><!--[-->`);
+    const each_array_7 = ensure_array_like(allStudios);
+    for (let $$index_7 = 0, $$length = each_array_7.length; $$index_7 < $$length; $$index_7++) {
+      let st = each_array_7[$$index_7];
+      $$renderer2.option({ value: displayName(st.names) }, ($$renderer3) => {
+      });
+    }
+    $$renderer2.push(`<!--]--></datalist></div> <div class="field"><span class="label">Деятели</span> <!--[-->`);
+    const each_array_8 = ensure_array_like(personRows);
+    for (let i = 0, $$length = each_array_8.length; i < $$length; i++) {
+      let p = each_array_8[i];
+      $$renderer2.push(`<div class="row-3 svelte-j15r9w">`);
+      $$renderer2.select(
+        { class: "select sm", value: p.role },
+        ($$renderer3) => {
+          $$renderer3.push(`<!--[-->`);
+          const each_array_9 = ensure_array_like(PEOPLE_ROLES);
+          for (let $$index_8 = 0, $$length2 = each_array_9.length; $$index_8 < $$length2; $$index_8++) {
+            let r = each_array_9[$$index_8];
+            $$renderer3.option({ value: r.id }, ($$renderer4) => {
+              $$renderer4.push(`${escape_html(r.label)}`);
+            });
+          }
+          $$renderer3.push(`<!--]-->`);
+        },
+        "svelte-j15r9w"
+      );
+      $$renderer2.push(` <input class="input svelte-j15r9w"${attr("list", "person-options-" + p.role)} placeholder="Имя…"${attr("value", p.name)}/> <button class="btn btn-icon sm svelte-j15r9w">`);
+      Minus($$renderer2, { size: 14 });
+      $$renderer2.push(`<!----></button></div>`);
+    }
+    $$renderer2.push(`<!--]--> <button class="btn sm svelte-j15r9w">`);
+    Plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> Добавить деятеля</button> <span class="rel-hint svelte-j15r9w">Выберите деятеля из списка или введите новое имя — он создастся автоматически.</span> <!--[-->`);
+    const each_array_10 = ensure_array_like(PEOPLE_ROLES);
+    for (let $$index_11 = 0, $$length = each_array_10.length; $$index_11 < $$length; $$index_11++) {
+      let r = each_array_10[$$index_11];
+      $$renderer2.push(`<datalist${attr("id", "person-options-" + r.id)}><!--[-->`);
+      const each_array_11 = ensure_array_like(allPeople.filter((p) => p.role === r.id));
+      for (let $$index_10 = 0, $$length2 = each_array_11.length; $$index_10 < $$length2; $$index_10++) {
+        let pr = each_array_11[$$index_10];
+        $$renderer2.option({ value: displayName(pr.names) }, ($$renderer3) => {
+        });
+      }
+      $$renderer2.push(`<!--]--></datalist>`);
+    }
+    $$renderer2.push(`<!--]--></div> <div class="form-row svelte-j15r9w"><div class="field"><span class="label">Жанры</span> <!--[-->`);
+    const each_array_12 = ensure_array_like(genres);
+    for (let i = 0, $$length = each_array_12.length; i < $$length; i++) {
+      each_array_12[i];
+      $$renderer2.push(`<div class="row-2 svelte-j15r9w"><input class="input svelte-j15r9w" placeholder="Жанр…"${attr("value", genres[i])}/> <button class="btn btn-icon sm svelte-j15r9w">`);
+      Minus($$renderer2, { size: 14 });
+      $$renderer2.push(`<!----></button></div>`);
+    }
+    $$renderer2.push(`<!--]--> <button class="btn sm svelte-j15r9w">`);
+    Plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> Жанр</button></div> <div class="field"><span class="label">Теги</span> <!--[-->`);
+    const each_array_13 = ensure_array_like(tags);
+    for (let i = 0, $$length = each_array_13.length; i < $$length; i++) {
+      each_array_13[i];
+      $$renderer2.push(`<div class="row-2 svelte-j15r9w"><input class="input svelte-j15r9w" placeholder="Тег…"${attr("value", tags[i])}/> <button class="btn btn-icon sm svelte-j15r9w">`);
+      Minus($$renderer2, { size: 14 });
+      $$renderer2.push(`<!----></button></div>`);
+    }
+    $$renderer2.push(`<!--]--> <button class="btn sm svelte-j15r9w">`);
+    Plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> Тег</button></div></div> <div class="form-row svelte-j15r9w"><div class="field"><span class="label">Оценка (0–5)</span> <input type="number" class="input" min="0" max="5" step="0.5"${attr("value", score)}/></div> <div class="field"><span class="label">Мой статус</span> `);
+    $$renderer2.select({ class: "select", value: status }, ($$renderer3) => {
+      $$renderer3.push(`<!--[-->`);
+      const each_array_14 = ensure_array_like(STATUSES);
+      for (let $$index_14 = 0, $$length = each_array_14.length; $$index_14 < $$length; $$index_14++) {
+        let s = each_array_14[$$index_14];
+        $$renderer3.option({ value: s.id }, ($$renderer4) => {
+          $$renderer4.push(`${escape_html(s.label)}`);
+        });
+      }
+      $$renderer3.push(`<!--]-->`);
+    });
+    $$renderer2.push(`</div></div> <div class="field"><span class="label">Статус тайтла</span> `);
+    $$renderer2.select({ class: "select", value: releaseStatus }, ($$renderer3) => {
+      $$renderer3.push(`<!--[-->`);
+      const each_array_15 = ensure_array_like(RELEASE_STATUSES);
+      for (let $$index_15 = 0, $$length = each_array_15.length; $$index_15 < $$length; $$index_15++) {
+        let s = each_array_15[$$index_15];
+        $$renderer3.option({ value: s.id }, ($$renderer4) => {
+          $$renderer4.push(`${escape_html(s.label)}`);
+        });
+      }
+      $$renderer3.push(`<!--]-->`);
+    });
+    $$renderer2.push(`</div> `);
+    if (typeShelves().length > 0) {
+      $$renderer2.push("<!--[0-->");
+      $$renderer2.push(`<div class="field"><span class="label">Полка</span> `);
+      $$renderer2.select({ class: "select", value: shelfId }, ($$renderer3) => {
+        $$renderer3.option({ value: 0 }, ($$renderer4) => {
+          $$renderer4.push(`Без полки`);
+        });
+        $$renderer3.push(`<!--[-->`);
+        const each_array_16 = ensure_array_like(typeShelves());
+        for (let $$index_16 = 0, $$length = each_array_16.length; $$index_16 < $$length; $$index_16++) {
+          let s = each_array_16[$$index_16];
+          $$renderer3.option({ value: s.id }, ($$renderer4) => {
+            $$renderer4.push(`${escape_html(s.name)}`);
+          });
+        }
+        $$renderer3.push(`<!--]-->`);
+      });
+      $$renderer2.push(`</div>`);
+    } else {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--> <div class="field"><span class="label">Свой список</span> <input class="input" placeholder="Название пользовательского списка…"${attr("value", customList)}/></div> <div class="field"><span class="label">Персонажи</span> <!--[-->`);
+    const each_array_17 = ensure_array_like(charRows);
+    for (let i = 0, $$length = each_array_17.length; i < $$length; i++) {
+      let char = each_array_17[i];
+      $$renderer2.push(`<div class="row-2 svelte-j15r9w"><input class="input svelte-j15r9w" list="character-options" placeholder="Имя персонажа…"${attr("value", char.name)}/> <button class="btn btn-icon sm svelte-j15r9w">`);
+      Minus($$renderer2, { size: 14 });
+      $$renderer2.push(`<!----></button></div>`);
+    }
+    $$renderer2.push(`<!--]--> <button class="btn sm svelte-j15r9w">`);
+    Plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> Добавить персонажа</button> <span class="rel-hint svelte-j15r9w">Выберите персонажа из списка или введите новое имя — он создастся автоматически, и позже его можно будет полностью отредактировать.</span> <datalist id="character-options"><!--[-->`);
+    const each_array_18 = ensure_array_like(allCharacters);
+    for (let $$index_18 = 0, $$length = each_array_18.length; $$index_18 < $$length; $$index_18++) {
+      let c = each_array_18[$$index_18];
+      $$renderer2.option({ value: displayName(c.names) }, ($$renderer3) => {
+      });
+    }
+    $$renderer2.push(`<!--]--></datalist></div> <div class="field"><span class="label">Связи</span> <!--[-->`);
+    const each_array_19 = ensure_array_like(relations);
+    for (let i = 0, $$length = each_array_19.length; i < $$length; i++) {
+      let rel = each_array_19[i];
+      $$renderer2.push(`<div class="rel-edit svelte-j15r9w"><div class="row-3 svelte-j15r9w">`);
+      $$renderer2.select(
+        { class: "select sm", value: rel.relatedId },
+        ($$renderer3) => {
+          $$renderer3.option({ value: 0, disabled: true, hidden: true }, ($$renderer4) => {
+            $$renderer4.push(`Тайтл…`);
+          });
+          $$renderer3.push(`<!--[-->`);
+          const each_array_20 = ensure_array_like(relationCandidates(i));
+          for (let $$index_19 = 0, $$length2 = each_array_20.length; $$index_19 < $$length2; $$index_19++) {
+            let t = each_array_20[$$index_19];
+            $$renderer3.option({ value: t.id }, ($$renderer4) => {
+              $$renderer4.push(`${escape_html(displayName(t.names))}`);
+            });
+          }
+          $$renderer3.push(`<!--]-->`);
+        },
+        "svelte-j15r9w"
+      );
+      $$renderer2.push(` <input class="input svelte-j15r9w" placeholder="Метка здесь (например, «Источник»)…"${attr("value", rel.label)}/> <button class="btn btn-icon sm svelte-j15r9w">`);
+      Minus($$renderer2, { size: 14 });
+      $$renderer2.push(`<!----></button></div> <input class="input" placeholder="Метка на другом тайтле (например, «Экранизация»)…"${attr("value", rel.reverseLabel)}/></div>`);
+    }
+    $$renderer2.push(`<!--]--> <button class="btn sm svelte-j15r9w">`);
+    Plus($$renderer2, { size: 14 });
+    $$renderer2.push(`<!----> Добавить связь</button></div> <div class="field"><span class="label">Прогресс</span> <div class="progress-fields svelte-j15r9w"><!--[-->`);
+    const each_array_21 = ensure_array_like(progressForType(type));
+    for (let $$index_21 = 0, $$length = each_array_21.length; $$index_21 < $$length; $$index_21++) {
+      let f = each_array_21[$$index_21];
+      $$renderer2.push(`<div class="prog-item svelte-j15r9w"><span class="prog-label svelte-j15r9w">${escape_html(f.label)}</span> <div class="prog-row svelte-j15r9w"><button class="btn btn-icon sm svelte-j15r9w">`);
+      Minus($$renderer2, { size: 14 });
+      $$renderer2.push(`<!----></button> <input type="number" class="input sm svelte-j15r9w" min="0"${attr("value", progress[f.id])}/> <button class="btn btn-icon sm svelte-j15r9w">`);
+      Plus($$renderer2, { size: 14 });
+      $$renderer2.push(`<!----></button></div></div>`);
+    }
+    $$renderer2.push(`<!--]--> `);
+    {
+      $$renderer2.push("<!--[0-->");
+      $$renderer2.push(`<div class="prog-item svelte-j15r9w"><span class="prog-label svelte-j15r9w">Вышло глав</span> <input type="number" class="input sm svelte-j15r9w" min="0"${attr("value", progress.totalChapters)}/></div>`);
+    }
+    $$renderer2.push(`<!--]--></div></div> <div class="actions svelte-j15r9w"><button class="btn">Отмена</button> <button class="btn btn-primary"${attr("disabled", saving, true)}>${escape_html("Сохранить")}</button></div></div></div>`);
+  });
+}
+export {
+  _page as default
+};
