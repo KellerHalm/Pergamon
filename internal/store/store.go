@@ -406,6 +406,45 @@ func findOrCreatePersonTx(tx *sql.Tx, name, role string) (int64, error) {
 	return id, nil
 }
 
+func findOrCreateCharacterTx(tx *sql.Tx, name string) (int64, error) {
+	rows, err := tx.Query(`SELECT character_id, value FROM character_names`)
+	if err != nil {
+		return 0, err
+	}
+	var found int64
+	for rows.Next() {
+		var id int64
+		var v string
+		if err := rows.Scan(&id, &v); err != nil {
+			rows.Close()
+			return 0, err
+		}
+		if strings.EqualFold(strings.TrimSpace(v), name) {
+			found = id
+			break
+		}
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return 0, err
+	}
+	if found != 0 {
+		return found, nil
+	}
+	res, err := tx.Exec(`INSERT INTO characters(main_image,age,race,description) VALUES('','','','')`)
+	if err != nil {
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if _, err := tx.Exec(`INSERT INTO character_names(character_id,kind,value) VALUES(?,?,?)`, id, "original", name); err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func (s *Store) addColumnIfMissing(table, column, decl string) error {
 	rows, err := s.db.Query(`PRAGMA table_info(` + table + `)`)
 	if err != nil {

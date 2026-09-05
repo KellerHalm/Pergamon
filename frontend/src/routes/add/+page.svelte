@@ -51,7 +51,7 @@
 	let shelfId = $state(0);
 	let relations = $state<{ relatedId: number; label: string; reverseLabel: string }[]>([]);
 	let allTitles = $state<Title[]>([]);
-	let charRefs = $state<{ id: number }[]>([]);
+	let charRows = $state<{ name: string }[]>([]);
 	let allCharacters = $state<Character[]>([]);
 	let allStudios = $state<Studio[]>([]);
 	let allPeople = $state<Person[]>([]);
@@ -165,7 +165,9 @@
 				genres: genres.filter((g) => g.trim()),
 				tags: tags.filter((t) => t.trim()),
 				relations: relations.filter((r) => r.relatedId > 0),
-				characters: charRefs.filter((c) => c.id > 0),
+				characters: charRows
+					.map((c) => ({ id: 0, name: c.name.trim() }))
+					.filter((c) => c.name),
 				score,
 				status,
 				releaseStatus,
@@ -204,11 +206,7 @@
 	function addTag() { tags.push(''); }
 	function addRelation() { relations.push({ relatedId: 0, label: '', reverseLabel: '' }); }
 
-	function addCharRef() { charRefs.push({ id: 0 }); }
-	function charCandidates(i: number) {
-		const picked = charRefs.map((c, j) => (j === i ? 0 : c.id));
-		return allCharacters.filter((c) => !picked.includes(c.id));
-	}
+	function addCharRow() { charRows.push({ name: '' }); }
 
 	function relationCandidates(i: number) {
 		const picked = relations.map((r, j) => (j === i ? 0 : r.relatedId));
@@ -416,19 +414,19 @@
 
 		<div class="field">
 			<span class="label">Персонажи</span>
-			{#each charRefs as char, i}
+			{#each charRows as char, i}
 				<div class="row-2">
-					<select class="select sm" bind:value={char.id}>
-						<option value={0} disabled hidden>Персонаж…</option>
-						{#each charCandidates(i) as c (c.id)}
-							<option value={c.id}>{displayName(c.names)}</option>
-						{/each}
-					</select>
-					<button class="btn btn-icon sm" onclick={() => charRefs.splice(i, 1)}><Minus size={14} /></button>
+					<input class="input" list="character-options" placeholder="Имя персонажа…" bind:value={char.name} />
+					<button class="btn btn-icon sm" onclick={() => charRows.splice(i, 1)}><Minus size={14} /></button>
 				</div>
 			{/each}
-			<button class="btn sm" onclick={addCharRef}><Plus size={14} /> Добавить персонажа</button>
-			<span class="rel-hint">Список персонажей создаётся в разделе «Персонажи»; здесь выбираются уже добавленные.</span>
+			<button class="btn sm" onclick={addCharRow}><Plus size={14} /> Добавить персонажа</button>
+			<span class="rel-hint">Выберите персонажа из списка или введите новое имя — он создастся автоматически, и позже его можно будет полностью отредактировать.</span>
+			<datalist id="character-options">
+				{#each allCharacters as c (c.id)}
+					<option value={displayName(c.names)}></option>
+				{/each}
+			</datalist>
 		</div>
 
 		<div class="field">

@@ -57,6 +57,7 @@ import { tick } from 'svelte';
 	let charImgUrls = $state<Record<number, string>>({});
 	let editStudioRows = $state<{ name: string }[]>([]);
 	let editPersonRows = $state<{ role: string; name: string }[]>([]);
+	let editCharRows = $state<{ name: string }[]>([]);
 	let loadedId = 0;
 
 	const id = $derived(Number($page.params.id));
@@ -204,6 +205,7 @@ import { tick } from 'svelte';
 		editTitle.characters = (editTitle.characters || []).map((c: any) => ({ id: c.id }));
 		editStudioRows = (title?.studios || []).map((s) => ({ name: s.name }));
 		editPersonRows = (title?.people || []).map((p) => ({ role: p.role, name: p.name }));
+		editCharRows = (title?.characters || []).map((c) => ({ name: c.name || '' }));
 		editShelfId = shelves.find((s) => s.titleIds.includes(id))?.id ?? 0;
 		editShelfInitial = editShelfId;
 		editing = true;
@@ -217,6 +219,9 @@ import { tick } from 'svelte';
 		editTitle.people = editPersonRows
 			.map((p) => ({ id: 0, role: p.role, name: p.name.trim() }))
 			.filter((p) => p.name);
+		editTitle.characters = editCharRows
+			.map((c) => ({ id: 0, name: c.name.trim() }))
+			.filter((c) => c.name);
 		await titlesApi.save(editTitle);
 		await titlesApi.updateIncomingRelations(
 			id,
@@ -291,15 +296,11 @@ import { tick } from 'svelte';
 		return allTitles.filter((t) => t.id !== id && !picked.includes(t.id));
 	}
 
-	function addCharRef() {
-		editTitle.characters.push({ id: 0 });
+	function addCharRow() {
+		editCharRows.push({ name: '' });
 	}
-	function removeCharRef(i: number) {
-		editTitle.characters.splice(i, 1);
-	}
-	function charCandidates(i: number) {
-		const picked = editTitle.characters.map((c: any, j: number) => (j === i ? 0 : c.id));
-		return allCharacters.filter((c) => !picked.includes(c.id));
+	function removeCharRow(i: number) {
+		editCharRows.splice(i, 1);
 	}
 
 	function onCoverInput(e: Event) {
@@ -554,19 +555,19 @@ import { tick } from 'svelte';
 
 				<div class="field">
 					<span class="label">Персонажи</span>
-					{#each editTitle.characters as char, i}
+					{#each editCharRows as char, i}
 						<div class="row-2">
-							<select class="select sm" bind:value={char.id}>
-								<option value={0} disabled hidden>Персонаж…</option>
-								{#each charCandidates(i) as c (c.id)}
-									<option value={c.id}>{displayName(c.names)}</option>
-								{/each}
-							</select>
-							<button class="btn btn-icon sm" onclick={() => removeCharRef(i)}><Minus size={14} /></button>
+							<input class="input" list="character-options" placeholder="Имя персонажа…" bind:value={char.name} />
+							<button class="btn btn-icon sm" onclick={() => removeCharRow(i)}><Minus size={14} /></button>
 						</div>
 					{/each}
-					<button class="btn sm" onclick={addCharRef}><Plus size={14} /> Добавить персонажа</button>
-					<span class="rel-hint">Список персонажей создаётся в разделе «Персонажи»; здесь выбираются уже добавленные.</span>
+					<button class="btn sm" onclick={addCharRow}><Plus size={14} /> Добавить персонажа</button>
+					<span class="rel-hint">Выберите персонажа из списка или введите новое имя — он создастся автоматически, и позже его можно будет полностью отредактировать.</span>
+					<datalist id="character-options">
+						{#each allCharacters as c (c.id)}
+							<option value={displayName(c.names)}></option>
+						{/each}
+					</datalist>
 				</div>
 
 				<div class="field">

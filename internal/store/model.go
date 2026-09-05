@@ -589,7 +589,15 @@ func saveTitleCharacters(tx *sql.Tx, titleID int64, chars []CharacterRef) error 
 	}
 	for i, c := range chars {
 		if c.ID == 0 {
-			continue
+			name := strings.TrimSpace(c.Name)
+			if name == "" {
+				continue
+			}
+			var err error
+			c.ID, err = findOrCreateCharacterTx(tx, name)
+			if err != nil {
+				return err
+			}
 		}
 		if _, err := tx.Exec(`INSERT OR IGNORE INTO title_characters(title_id,character_id,position)
 			SELECT ?,?,? WHERE EXISTS(SELECT 1 FROM characters WHERE id=?)`, titleID, c.ID, i, c.ID); err != nil {
