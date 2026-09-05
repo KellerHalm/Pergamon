@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20260905T162056388Z-13668-bffc85e614b9",
+  "runStatus": "inconclusive",
+  "errors": [
+    "bash-discovery:frontend/.svelte-kit/output/client/_app/immutable/chunks/Beu7m20r.js: bash_discovery_truncated: changed-file discovery exceeded 80 files",
+    "candidate-select:frontend/.svelte-kit/types/src/routes/person/[id]/edit/$types.d.ts: candidate_limit_exceeded: 63 changed reviewable file(s) were not scanned because the limit is 20",
+    "baseline-read:frontend/.svelte-kit/types/src/routes/studios/$types.d.ts: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:frontend/.svelte-kit/types/src/routes/studio/[id]/$types.d.ts: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:frontend/.svelte-kit/types/src/routes/studio/[id]/edit/$types.d.ts: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:frontend/.svelte-kit/types/src/routes/studio/add/$types.d.ts: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:frontend/.svelte-kit/types/src/routes/person/[id]/$types.d.ts: baseline_snapshot_unreadable: file is missing from task baseline",
+    "scan:internal/store/model.go: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:internal/store/store.go: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:app.go: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:internal/sync/json.go: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:cmd/studiotest/main.go: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:cmd/migtest/main.go: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:cmd/legacydb/main.go: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/src/app.d.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/src/lib/api.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/src/lib/constants.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/wailsjs/go/models.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/wailsjs/go/main/App.d.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/wailsjs/go/main/App.js: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/.svelte-kit/non-ambient.d.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/.svelte-kit/types/src/routes/$types.d.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/.svelte-kit/types/src/routes/studios/$types.d.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/.svelte-kit/types/src/routes/studio/[id]/$types.d.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/.svelte-kit/types/src/routes/studio/[id]/edit/$types.d.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/.svelte-kit/types/src/routes/studio/add/$types.d.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:frontend/.svelte-kit/types/src/routes/person/[id]/$types.d.ts: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "cbe0458f01b3fe940445a8b88d2c47a6c6a19242",
+  "diffHash": "4cc2b9015c7d9fa1e3d3e39500524c60d024c7b2d3d309f43f12d55130f75e87",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-09-05T16:20:56.388Z",
+  "timing": {
+    "startedAt": "2026-09-05T16:20:53.334Z",
+    "completedAt": "2026-09-05T16:20:56.388Z",
+    "durationMs": 3054
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "bash_discovery_truncated": 1,
+      "candidate_limit_exceeded": 1,
+      "baseline_snapshot_unreadable": 5,
+      "scanner_failed": 20,
+      "project_check_failed": 27
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-sess_49897288-d184-41d2-903d-b4ce419f4db2-20260905T162056388Z-13668-bffc85e614b9.json"
+}

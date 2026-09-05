@@ -1,0 +1,1 @@
+import{a as s,f as e}from"../chunks/BwWQI0Re.js";import"../chunks/D7qjkSpV.js";import{C as i,z as t,B as m}from"../chunks/CjuUICSG.js";import{P as p}from"../chunks/DAzrHu6_.js";var n=e('<div class="page svelte-1eu1ziy"><h1 class="svelte-1eu1ziy">Добавить деятеля</h1> <!></div>');function c(a){var o=n(),r=i(t(o),2);p(r,{}),m(o),s(a,o)}export{c as component};
