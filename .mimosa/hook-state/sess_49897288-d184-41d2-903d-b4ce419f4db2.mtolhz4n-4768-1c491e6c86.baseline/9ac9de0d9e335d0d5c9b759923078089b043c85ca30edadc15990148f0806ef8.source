@@ -1,0 +1,33 @@
+const api = () => window.go.main.App;
+const titlesApi = {
+  list: (q = {}) => api().ListTitles(q),
+  get: (id) => api().GetTitle(id),
+  save: (t) => api().SaveTitle(t),
+  updateIncomingRelations: (id, rels) => api().UpdateIncomingRelations(id, rels),
+  delete: (id) => api().DeleteTitle(id),
+  adjustProgress: (id, field, delta) => api().AdjustProgress(id, field, delta)
+};
+const charactersApi = {
+  list: (sort = "") => api().ListCharacters(sort),
+  get: (id) => api().GetCharacter(id),
+  save: (c) => api().SaveCharacter(c),
+  delete: (id) => api().DeleteCharacter(id)
+};
+const studiosApi = {
+  list: (sort = "") => api().ListStudios(sort),
+  get: (id) => api().GetStudio(id),
+  save: (s) => api().SaveStudio(s),
+  delete: (id) => api().DeleteStudio(id)
+};
+const peopleApi = {
+  list: (sort = "") => api().ListPeople(sort),
+  get: (id) => api().GetPerson(id),
+  save: (p) => api().SavePerson(p),
+  delete: (id) => api().DeletePerson(id)
+};
+export {
+  charactersApi as c,
+  peopleApi as p,
+  studiosApi as s,
+  titlesApi as t
+};

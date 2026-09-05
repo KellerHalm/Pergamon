@@ -1,0 +1,1015 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20260905T162056388Z-13668-bffc85e614b9",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "bash-discovery",
+      "target": "frontend/.svelte-kit/output/client/_app/immutable/chunks/Beu7m20r.js",
+      "reason": "bash_discovery_truncated: changed-file discovery exceeded 80 files"
+    },
+    {
+      "stage": "candidate-select",
+      "target": "frontend/.svelte-kit/types/src/routes/person/[id]/edit/$types.d.ts",
+      "reason": "candidate_limit_exceeded: 63 changed reviewable file(s) were not scanned because the limit is 20"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "frontend/.svelte-kit/types/src/routes/studios/$types.d.ts",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/$types.d.ts",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/edit/$types.d.ts",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "frontend/.svelte-kit/types/src/routes/studio/add/$types.d.ts",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "frontend/.svelte-kit/types/src/routes/person/[id]/$types.d.ts",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "scan",
+      "target": "internal/store/model.go",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "internal/store/store.go",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "app.go",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "internal/sync/json.go",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "cmd/studiotest/main.go",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "cmd/migtest/main.go",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "cmd/legacydb/main.go",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/src/app.d.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/src/lib/api.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/src/lib/constants.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/wailsjs/go/models.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/wailsjs/go/main/App.d.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/wailsjs/go/main/App.js",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/.svelte-kit/non-ambient.d.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/.svelte-kit/types/src/routes/$types.d.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/.svelte-kit/types/src/routes/studios/$types.d.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/$types.d.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/edit/$types.d.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/.svelte-kit/types/src/routes/studio/add/$types.d.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "frontend/.svelte-kit/types/src/routes/person/[id]/$types.d.ts",
+      "reason": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": true,
+      "captured_files": 156,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 0,
+      "compensated_target_count": 34
+    },
+    "change_tracking": {
+      "touched_observed": 10,
+      "touched_retained": 10,
+      "truncated": false,
+      "bash_mutation": true,
+      "bash_discovered": 80,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": true
+    },
+    "candidates": {
+      "eligible_files": 83,
+      "selected_files": 20,
+      "limit": 20,
+      "truncated": true
+    },
+    "scanning": {
+      "required_files": 20,
+      "scanned_files": 0,
+      "skipped_files": 0,
+      "failed_files": 20,
+      "project_checks_required": 0,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "bash_discovery_truncated": 1,
+      "candidate_limit_exceeded": 1,
+      "baseline_snapshot_unreadable": 5,
+      "scanner_failed": 20,
+      "project_check_failed": 27
+    },
+    "reasons": [
+      {
+        "code": "bash_discovery_truncated",
+        "stage": "bash-discovery",
+        "target": "frontend/.svelte-kit/output/client/_app/immutable/chunks/Beu7m20r.js",
+        "detail": "changed-file discovery exceeded 80 files",
+        "affects_completion": true
+      },
+      {
+        "code": "candidate_limit_exceeded",
+        "stage": "candidate-select",
+        "target": "frontend/.svelte-kit/types/src/routes/person/[id]/edit/$types.d.ts",
+        "detail": "63 changed reviewable file(s) were not scanned because the limit is 20",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/studios/$types.d.ts",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/$types.d.ts",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/edit/$types.d.ts",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/add/$types.d.ts",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/person/[id]/$types.d.ts",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "internal/store/model.go",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "internal/store/store.go",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "app.go",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "internal/sync/json.go",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "cmd/studiotest/main.go",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "cmd/migtest/main.go",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "cmd/legacydb/main.go",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/src/app.d.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/src/lib/api.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/src/lib/constants.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/wailsjs/go/models.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/wailsjs/go/main/App.d.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/wailsjs/go/main/App.js",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/non-ambient.d.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/$types.d.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/studios/$types.d.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/$types.d.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/edit/$types.d.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/add/$types.d.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/person/[id]/$types.d.ts",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "bash-discovery",
+        "target": "frontend/.svelte-kit/output/client/_app/immutable/chunks/Beu7m20r.js",
+        "detail": "bash_discovery_truncated: changed-file discovery exceeded 80 files",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "candidate-select",
+        "target": "frontend/.svelte-kit/types/src/routes/person/[id]/edit/$types.d.ts",
+        "detail": "candidate_limit_exceeded: 63 changed reviewable file(s) were not scanned because the limit is 20",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/studios/$types.d.ts",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/$types.d.ts",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/edit/$types.d.ts",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/add/$types.d.ts",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "frontend/.svelte-kit/types/src/routes/person/[id]/$types.d.ts",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "internal/store/model.go",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "internal/store/store.go",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "app.go",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "internal/sync/json.go",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "cmd/studiotest/main.go",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "cmd/migtest/main.go",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "cmd/legacydb/main.go",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/src/app.d.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/src/lib/api.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/src/lib/constants.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/wailsjs/go/models.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/wailsjs/go/main/App.d.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/wailsjs/go/main/App.js",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/non-ambient.d.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/$types.d.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/studios/$types.d.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/$types.d.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/[id]/edit/$types.d.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/studio/add/$types.d.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "frontend/.svelte-kit/types/src/routes/person/[id]/$types.d.ts",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": false
+  },
+  "generated_at": "2026-09-05T16:20:56.388Z",
+  "session_id": "sess_49897288-d184-41d2-903d-b4ce419f4db2",
+  "target": ".",
+  "revision": "cbe0458f01b3fe940445a8b88d2c47a6c6a19242",
+  "rules_version": "unavailable",
+  "diff_hash": "4cc2b9015c7d9fa1e3d3e39500524c60d024c7b2d3d309f43f12d55130f75e87",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 20,
+    "changed_files": [
+      {
+        "file": "app.go",
+        "ranges": [
+          {
+            "start": 159,
+            "end": 190
+          }
+        ],
+        "before_hash": "2af4115c6e655cbc211b322d8b6389f84ee8892a6737c87baa5506a2a824d472",
+        "after_hash": "295ce5c7d7a7c58ae5d0b67ed2041c57682bcb4e68634188f6dfa8aa4417ac9d"
+      },
+      {
+        "file": "cmd/legacydb/main.go",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 33
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "370f02369048b194edaf4050798baf10ce8ce381698b5ffeadf94cf95f0f30f6"
+      },
+      {
+        "file": "cmd/migtest/main.go",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 39
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "f19bdf7c5d708e3edbbab3c4ad3fd746a63e7f33799194609b4ad2e6611e328e"
+      },
+      {
+        "file": "cmd/studiotest/main.go",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 178
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "014d8ba9f3b4b3c5f6ed14ab250f50f8b3d8b51133cd105f0e073811f5f4888d"
+      },
+      {
+        "file": "frontend/.svelte-kit/non-ambient.d.ts",
+        "ranges": [
+          {
+            "start": 32,
+            "end": 32
+          },
+          {
+            "start": 36,
+            "end": 39
+          },
+          {
+            "start": 51,
+            "end": 55
+          },
+          {
+            "start": 58,
+            "end": 62
+          },
+          {
+            "start": 67,
+            "end": 67
+          }
+        ],
+        "before_hash": "791f3f13d6644f1194ee0d6730fbc748f143fd18aeeb9dfccf5513f8055bc0bc",
+        "after_hash": "f565b920e466d42ff21b6bc61d605fd15929072195187929ef11ed2ecc70ae55"
+      },
+      {
+        "file": "frontend/.svelte-kit/types/src/routes/$types.d.ts",
+        "ranges": [
+          {
+            "start": 14,
+            "end": 14
+          }
+        ],
+        "before_hash": "86097c7a0a0ef8295cb06a8cdd55a9bfb4b1cd84b76b048367c0e6733830f18a",
+        "after_hash": "32a9b61a37db69fa90e08b7fc4467873a12dc30eac40f7e783e27a27c3eddbfd"
+      },
+      {
+        "file": "frontend/.svelte-kit/types/src/routes/person/[id]/$types.d.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 18
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "62c1a9e9da53f6237a638cb4f3cdc6381563415d32c0a406c3c3b6d8b3cbe694"
+      },
+      {
+        "file": "frontend/.svelte-kit/types/src/routes/studio/[id]/$types.d.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 18
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "acacc93082c617e9c8fb599511caf183d1284ff3f9c73e33e976ff9858518d15"
+      },
+      {
+        "file": "frontend/.svelte-kit/types/src/routes/studio/[id]/edit/$types.d.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 18
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "f92ea81bc8b3d3cca7be6c6a9da8c4850c33dc048f9795a5964076ad1803af62"
+      },
+      {
+        "file": "frontend/.svelte-kit/types/src/routes/studio/add/$types.d.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 17
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "e54fc3828bf8321727071e039611f64b3d23b59b0450b4828f67b1c136839251"
+      },
+      {
+        "file": "frontend/.svelte-kit/types/src/routes/studios/$types.d.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 17
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "8a398e1cc52812be2544579aeb3b909b411b20001c7bd26ea9ec44ee2d9befdd"
+      },
+      {
+        "file": "frontend/src/app.d.ts",
+        "ranges": [
+          {
+            "start": 25,
+            "end": 32
+          },
+          {
+            "start": 97,
+            "end": 98
+          },
+          {
+            "start": 144,
+            "end": 185
+          }
+        ],
+        "before_hash": "7348704da85d46c0f4286be51e5f5c3735d3b2c90bb38e3c6e802c1f872344a4",
+        "after_hash": "400ffe06b94453657f9b72bc58704ea38a0da2bb67718ef7de684f5d6d6c6658"
+      },
+      {
+        "file": "frontend/src/lib/api.ts",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 1
+          },
+          {
+            "start": 39,
+            "end": 52
+          }
+        ],
+        "before_hash": "6f9ce15a6f9b08a50c1a0bff81cb2abaffdf100bfccd5869088fac57b6cd8280",
+        "after_hash": "3c0b7696eba920a50413e2057d05586d6dc4c2fb54f9dd3709ccc030acd72ab7"
+      },
+      {
+        "file": "frontend/src/lib/constants.ts",
+        "ranges": [
+          {
+            "start": 58,
+            "end": 59
+          },
+          {
+            "start": 102,
+            "end": 105
+          }
+        ],
+        "before_hash": "b3f2cc085832580d7fd63152dd351e2b5cd6c5156c4375ff0e72ed5971fabe54",
+        "after_hash": "2e7d3114cefe4ee99e1809a4b208bf7b15f727ae14bf17dc35026448532bb027"
+      },
+      {
+        "file": "frontend/wailsjs/go/main/App.d.ts",
+        "ranges": [
+          {
+            "start": 21,
+            "end": 22
+          },
+          {
+            "start": 25,
+            "end": 26
+          },
+          {
+            "start": 35,
+            "end": 36
+          },
+          {
+            "start": 39,
+            "end": 40
+          },
+          {
+            "start": 53,
+            "end": 54
+          },
+          {
+            "start": 57,
+            "end": 58
+          },
+          {
+            "start": 65,
+            "end": 66
+          },
+          {
+            "start": 69,
+            "end": 70
+          }
+        ],
+        "before_hash": "09966f81eef416d43fea33c4e2530e3b4f8b15cf0a059315c458a7a555a7f2ab",
+        "after_hash": "a84176ad6167a6878efc24ad0b28ef7ef4819e67506cf667b75401aeda06c8bb"
+      },
+      {
+        "file": "frontend/wailsjs/go/main/App.js",
+        "ranges": [
+          {
+            "start": 33,
+            "end": 36
+          },
+          {
+            "start": 41,
+            "end": 44
+          },
+          {
+            "start": 61,
+            "end": 64
+          },
+          {
+            "start": 69,
+            "end": 72
+          },
+          {
+            "start": 97,
+            "end": 100
+          },
+          {
+            "start": 105,
+            "end": 108
+          },
+          {
+            "start": 121,
+            "end": 124
+          },
+          {
+            "start": 129,
+            "end": 132
+          }
+        ],
+        "before_hash": "8e0b8cd0c1bb0aaf518781105709a84d35f9ee723445d1fb1cc93683737da3f4",
+        "after_hash": "163eb7c04899320169e69840143f35dc1c393e191f6378fb00fccfe41665d895"
+      },
+      {
+        "file": "frontend/wailsjs/go/models.ts",
+        "ranges": [
+          {
+            "start": 184,
+            "end": 255
+          },
+          {
+            "start": 304,
+            "end": 367
+          },
+          {
+            "start": 404,
+            "end": 405
+          },
+          {
+            "start": 435,
+            "end": 436
+          }
+        ],
+        "before_hash": "57d56ad78aff82018231d96c6942f781c75e9be93aab26e9e8f989b055c79f4c",
+        "after_hash": "b013ad26a5e25f1d122cbc57c457bade798ee2611caaf74de06cab5a3117665a"
+      },
+      {
+        "file": "internal/store/model.go",
+        "ranges": [
+          {
+            "start": 62,
+            "end": 103
+          },
+          {
+            "start": 129,
+            "end": 130
+          },
+          {
+            "start": 187,
+            "end": 190
+          },
+          {
+            "start": 240,
+            "end": 241
+          },
+          {
+            "start": 381,
+            "end": 416
+          },
+          {
+            "start": 471,
+            "end": 476
+          },
+          {
+            "start": 478,
+            "end": 529
+          },
+          {
+            "start": 532,
+            "end": 536
+          },
+          {
+            "start": 986,
+            "end": 1394
+          }
+        ],
+        "before_hash": "5d207a5c6af1299c7d1fed856e4631596e8e939c495acbccf691e96214d1f575",
+        "after_hash": "1fc2367d397fc1b8048a9870a924eb00da4212139e087d6a85e7434d50c5c2f5"
+      },
+      {
+        "file": "internal/store/store.go",
+        "ranges": [
+          {
+            "start": 5,
+            "end": 5
+          },
+          {
+            "start": 146,
+            "end": 207
+          },
+          {
+            "start": 226,
+            "end": 233
+          },
+          {
+            "start": 265,
+            "end": 267
+          },
+          {
+            "start": 271,
+            "end": 408
+          }
+        ],
+        "before_hash": "d5ebb30e0dee48110a88cb1f7bfdf77c9fc325b77a14a3b03e29e0c8a4e453fc",
+        "after_hash": "67c62f7506669d1fe11e89c7b88f5290fb3b7adb94151f8f8aab5357c86fbaa5"
+      },
+      {
+        "file": "internal/sync/json.go",
+        "ranges": [
+          {
+            "start": 11,
+            "end": 18
+          },
+          {
+            "start": 38,
+            "end": 45
+          },
+          {
+            "start": 52,
+            "end": 53
+          },
+          {
+            "start": 130,
+            "end": 181
+          }
+        ],
+        "before_hash": "20c3ef2e097df9d07307a732904a3f9282d367005870cb5d893ebb9ba226efe2",
+        "after_hash": "df50d4f18f6f97e3d509105b65ce609751608b8a70fd9293adfd13473a3e9212"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-09-05T16:20:53.334Z",
+    "completed_at": "2026-09-05T16:20:56.388Z",
+    "duration_ms": 3054,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 3054,
+    "peakMemoryBytes": 102756352,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 0,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-sess_49897288-d184-41d2-903d-b4ce419f4db2-20260905T162056388Z-13668-bffc85e614b9.json",
+    "latest_report": ".mimosa/reports/task-review-sess_49897288-d184-41d2-903d-b4ce419f4db2.json",
+    "history_summary": ".mimosa/history/run-20260905T162056388Z-13668-bffc85e614b9.json"
+  }
+}
