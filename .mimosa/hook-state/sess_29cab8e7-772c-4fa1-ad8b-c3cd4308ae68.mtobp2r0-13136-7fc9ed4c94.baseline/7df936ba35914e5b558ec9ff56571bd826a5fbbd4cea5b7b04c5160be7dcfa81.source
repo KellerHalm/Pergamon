@@ -1,0 +1,12 @@
+
+
+export const index = 0;
+export const universal = {
+  "ssr": false,
+  "prerender": false,
+  "trailingSlash": "ignore"
+};
+export const universal_id = "src/routes/+layout.ts";
+export const imports = ["_app/immutable/nodes/0.fkTG3bWe.js","_app/immutable/chunks/Dbr_FyTQ.js","_app/immutable/chunks/OQJb3a5h.js","_app/immutable/chunks/SVXsIV0C.js","_app/immutable/chunks/C3UXzNRf.js","_app/immutable/chunks/DqdDzhtw.js","_app/immutable/chunks/Byztcy6l.js","_app/immutable/chunks/DAVC9TfX.js","_app/immutable/chunks/BKVrhczq.js"];
+export const stylesheets = ["_app/immutable/assets/0.BcQw6RTe.css"];
+export const fonts = [];

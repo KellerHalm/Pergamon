@@ -48,7 +48,7 @@
 	let error = $state('');
 	let shelves = $state<Shelf[]>([]);
 	let shelfId = $state(0);
-	let relations = $state<{ relatedId: number; label: string }[]>([]);
+	let relations = $state<{ relatedId: number; label: string; reverseLabel: string }[]>([]);
 	let allTitles = $state<Title[]>([]);
 
 	const typeShelves = $derived(shelves.filter((s) => s.kind === type));
@@ -186,7 +186,7 @@
 	function addCreator() { creators.push({ role: 'author', name: '' }); }
 	function addGenre() { genres.push(''); }
 	function addTag() { tags.push(''); }
-	function addRelation() { relations.push({ relatedId: 0, label: '' }); }
+	function addRelation() { relations.push({ relatedId: 0, label: '', reverseLabel: '' }); }
 
 	function relationCandidates(i: number) {
 		const picked = relations.map((r, j) => (j === i ? 0 : r.relatedId));
@@ -370,15 +370,18 @@
 		<div class="field">
 			<span class="label">Связи</span>
 			{#each relations as rel, i}
-				<div class="row-3">
-					<select class="select sm" bind:value={rel.relatedId}>
-						<option value={0} disabled hidden>Тайтл…</option>
-						{#each relationCandidates(i) as t (t.id)}
-							<option value={t.id}>{displayName(t.names)}</option>
-						{/each}
-					</select>
-					<input class="input" placeholder="Какая это связь (например, продолжение)…" bind:value={rel.label} />
-					<button class="btn btn-icon sm" onclick={() => relations.splice(i, 1)}><Minus size={14} /></button>
+				<div class="rel-edit">
+					<div class="row-3">
+						<select class="select sm" bind:value={rel.relatedId}>
+							<option value={0} disabled hidden>Тайтл…</option>
+							{#each relationCandidates(i) as t (t.id)}
+								<option value={t.id}>{displayName(t.names)}</option>
+							{/each}
+						</select>
+						<input class="input" placeholder="Метка здесь (например, «Источник»)…" bind:value={rel.label} />
+						<button class="btn btn-icon sm" onclick={() => relations.splice(i, 1)}><Minus size={14} /></button>
+					</div>
+					<input class="input" placeholder="Метка на другом тайтле (например, «Экранизация»)…" bind:value={rel.reverseLabel} />
 				</div>
 			{/each}
 			<button class="btn sm" onclick={addRelation}><Plus size={14} /> Добавить связь</button>
@@ -460,6 +463,12 @@
 	.row-2 .input,
 	.row-3 .input {
 		flex: 1;
+	}
+	.rel-edit {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		margin-bottom: 8px;
 	}
 	.sm {
 		width: auto;

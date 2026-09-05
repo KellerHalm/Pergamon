@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260905T104449748Z-13180-db58c15f0560",
+  "runId": "20260905T104449748Z-13180-db58c15f0560",
+  "runStatus": "completed",
+  "coverage": {
+    "status": "complete",
+    "reasons": []
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "783f0a06e4a542b2e91376e0ad078e0da088a9c2",
+  "diffHash": "1d83464b545fde47f684313b684c7fc951b39ecfc4973fb85771b4591b58a874",
+  "rulesVersion": "unavailable",
+  "sessionHash": "64b1005b8e9270abc3298e5b45e17c41399efd4f4219f6d81909f5af8cc28aae",
+  "reportRef": ".mimosa/reports/task-review-sess_29cab8e7-772c-4fa1-ad8b-c3cd4308ae68-20260905T104449748Z-13180-db58c15f0560.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [
+    {
+      "file": "internal/store/model.go",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "internal/store/store.go",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "internal/sync/json.go",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "cmd/reltest/main.go",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "frontend/src/app.d.ts",
+      "direct": "complete",
+      "projectContext": "partial"
+    }
+  ],
+  "recordedAt": "2026-09-05T10:44:50.619Z"
+}

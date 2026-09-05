@@ -54,6 +54,12 @@ import { tick } from 'svelte';
 
 	const id = $derived(Number($page.params.id));
 	const editShelfOptions = $derived(shelves.filter((s) => s.kind === (title?.type ?? '')));
+	const displayRelations = $derived.by(() => {
+		if (!title) return [];
+		const own = (title.relations || []).map((r) => ({ id: r.relatedId, label: r.label, name: r.name || '', cover: r.cover || '' }));
+		const incoming = (title.reverseRelations || []).map((r) => ({ id: r.relatedId, label: r.label, name: r.name || '', cover: r.cover || '' }));
+		return [...own, ...incoming];
+	});
 	const SCORES = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
 
 	$effect(() => {
@@ -83,8 +89,8 @@ import { tick } from 'svelte';
 			for (const f of title.images || []) {
 				await ensureThumb(f);
 			}
-			for (const r of title.relations || []) {
-				if (r.cover) {
+			for (const r of [...(title.relations || []), ...(title.reverseRelations || [])]) {
+				if (r.cover && relCovers[r.relatedId] === undefined) {
 					relCovers[r.relatedId] = await coverApi.dataURL(r.cover);
 				}
 			}
@@ -148,7 +154,11 @@ import { tick } from 'svelte';
 		editTitle.images = [...(editTitle.images || [])];
 		editTitle.genres = [...editTitle.genres];
 		editTitle.tags = [...editTitle.tags];
-		editTitle.relations = (editTitle.relations || []).map((r: any) => ({ relatedId: r.relatedId, label: r.label }));
+		editTitle.relations = (editTitle.relations || []).map((r: any) => ({
+			relatedId: r.relatedId,
+			label: r.label,
+			reverseLabel: r.reverseLabel || ''
+		}));
 		for (const f of editTitle.images) {
 			await ensureThumb(f);
 		}
@@ -212,7 +222,7 @@ import { tick } from 'svelte';
 		editTitle.tags.splice(i, 1);
 	}
 	function addRelation() {
-		editTitle.relations.push({ relatedId: 0, label: '' });
+		editTitle.relations.push({ relatedId: 0, label: '', reverseLabel: '' });
 	}
 	function removeRelation(i: number) {
 		editTitle.relations.splice(i, 1);
@@ -450,18 +460,22 @@ import { tick } from 'svelte';
 				<div class="field">
 					<span class="label">Связи</span>
 					{#each e.relations as rel, i}
-						<div class="row-3">
-							<select class="select sm" bind:value={rel.relatedId}>
-								<option value={0} disabled hidden>Тайтл…</option>
-								{#each relationCandidates(i) as t (t.id)}
-									<option value={t.id}>{displayName(t.names)}</option>
-								{/each}
-							</select>
-							<input class="input" placeholder="Какая это связь (например, продолжение)…" bind:value={rel.label} />
-							<button class="btn btn-icon sm" onclick={() => removeRelation(i)}><Minus size={14} /></button>
+						<div class="rel-edit">
+							<div class="row-3">
+								<select class="select sm" bind:value={rel.relatedId}>
+									<option value={0} disabled hidden>Тайтл…</option>
+									{#each relationCandidates(i) as t (t.id)}
+										<option value={t.id}>{displayName(t.names)}</option>
+									{/each}
+								</select>
+								<input class="input" placeholder="Метка здесь (например, «Источник»)…" bind:value={rel.label} />
+								<button class="btn btn-icon sm" onclick={() => removeRelation(i)}><Minus size={14} /></button>
+							</div>
+							<input class="input" placeholder="Метка на другом тайтле (например, «Экранизация»)…" bind:value={rel.reverseLabel} />
 						</div>
 					{/each}
 					<button class="btn sm" onclick={addRelation}><Plus size={14} /> Добавить связь</button>
+					<span class="rel-hint">Связь редактируется только на тайтле, где она добавлена; у другого тайтла она отображается с встречной меткой.</span>
 				</div>
 
 				<div class="field">
@@ -699,18 +713,18 @@ import { tick } from 'svelte';
 					</div>
 				</section>
 
-			{#if title.relations.length > 0}
+			{#if displayRelations.length > 0}
 				<section class="section">
 					<h3>Связи</h3>
 					<div class="relations">
-						{#each title.relations as r (r.relatedId + ':' + r.label)}
-							<button class="relation" onclick={() => goto(`/title/${r.relatedId}`)}>
-								{#if relCovers[r.relatedId]}
-									<img src={relCovers[r.relatedId]} alt="" />
-								{:else}
-									<span class="rel-ph">{(r.name || '?').slice(0, 1).toUpperCase()}</span>
-								{/if}
-								<span class="rel-info">
+						{#each displayRelations as r (r.id + ':' + r.label)}
+							<button class="rel-card" onclick={() => goto(`/title/${r.id}`)}>
+								<span class="rel-poster">
+									{#if relCovers[r.id]}
+										<img src={relCovers[r.id]} alt="" />
+									{:else}
+										<span class="rel-ph">{(r.name || '?').slice(0, 1).toUpperCase()}</span>
+									{/if}
 									{#if r.label}<span class="rel-label">{r.label}</span>{/if}
 									<span class="rel-name">{r.name || 'Без названия'}</span>
 								</span>
@@ -1055,59 +1069,72 @@ import { tick } from 'svelte';
 
 	.relations {
 		display: flex;
-		flex-direction: column;
-		gap: 8px;
+		flex-wrap: wrap;
+		gap: 14px;
 	}
-	.relation {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		padding: 8px 12px;
-		background: var(--bg-elev);
-		border: 1px solid var(--border);
-		border-radius: var(--radius-sm);
-		text-align: left;
+	.rel-card {
+		padding: 0;
+		background: none;
+		border: none;
 		cursor: pointer;
-		width: 100%;
 	}
-	.relation:hover {
-		background: var(--bg-elev-2);
-	}
-	.relation img {
-		width: 36px;
-		height: 50px;
-		object-fit: cover;
-		border-radius: 4px;
-		flex: none;
-	}
-	.rel-ph {
-		width: 36px;
-		height: 50px;
-		border-radius: 4px;
-		background: var(--bg-elev-2);
-		color: var(--accent);
+	.rel-poster {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-weight: 700;
-		flex: none;
+		width: 118px;
+		aspect-ratio: 2 / 3;
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+		border: 1px solid var(--border);
+		background: var(--bg-elev-2);
 	}
-	.rel-info {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-		min-width: 0;
+	.rel-poster img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		transition: transform 0.15s;
 	}
-	.rel-label {
-		font-size: 11px;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
+	.rel-card:hover .rel-poster img {
+		transform: scale(1.05);
+	}
+	.rel-ph {
+		font-size: 40px;
+		font-weight: 800;
 		color: var(--accent);
 	}
-	.rel-name {
-		font-size: 14px;
+	.rel-label {
+		position: absolute;
+		top: 8px;
+		left: 8px;
+		right: 8px;
+		padding: 3px 6px;
+		font-size: 10px;
 		font-weight: 600;
-		color: var(--text);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: #fff;
+		background: rgba(0, 0, 0, 0.5);
+		border: 1px solid rgba(255, 255, 255, 0.4);
+		border-radius: 6px;
+		text-align: center;
+		pointer-events: none;
+	}
+	.rel-name {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		padding: 22px 8px 8px;
+		font-size: 12px;
+		font-weight: 600;
+		line-height: 1.25;
+		color: #fff;
+		text-align: center;
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+		pointer-events: none;
 	}
 
 	.edit-panel {
@@ -1136,6 +1163,18 @@ import { tick } from 'svelte';
 	.row-2 .input,
 	.row-3 .input {
 		flex: 1;
+	}
+	.rel-edit {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		margin-bottom: 8px;
+	}
+	.rel-hint {
+		display: block;
+		font-size: 11px;
+		color: var(--text-dim);
+		margin-top: 6px;
 	}
 	.sm {
 		width: auto;
