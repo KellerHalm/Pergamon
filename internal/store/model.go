@@ -1,6 +1,7 @@
 package store
 
 import (
+	"database/sql"
 	"sort"
 	"strings"
 )
@@ -13,6 +14,13 @@ type Name struct {
 type Creator struct {
 	Role string `json:"role"`
 	Name string `json:"name"`
+}
+
+type TitleRelation struct {
+	RelatedID int64  `json:"relatedId"`
+	Label     string `json:"label"`
+	Name      string `json:"name"`
+	Cover     string `json:"cover"`
 }
 
 type Progress struct {
@@ -37,6 +45,7 @@ type Title struct {
 	Creators   []Creator `json:"creators"`
 	Genres     []string  `json:"genres"`
 	Tags       []string  `json:"tags"`
+	Relations  []TitleRelation `json:"relations"`
 	Score      float64   `json:"score"`
 	Status     string    `json:"status"`
 	ReleaseStatus string `json:"releaseStatus"`
@@ -143,7 +152,7 @@ func (s *Store) ListTitles(f ListFilter) ([]Title, error) {
 }
 
 func (s *Store) GetTitle(id int64) (*Title, error) {
-	t := &Title{Names: []Name{}, Creators: []Creator{}, Genres: []string{}, Tags: []string{}, Images: []string{}}
+	t := &Title{Names: []Name{}, Creators: []Creator{}, Genres: []string{}, Tags: []string{}, Images: []string{}, Relations: []TitleRelation{}}
 	err := s.db.QueryRow(`SELECT id,type,category,cover,synopsis,score,status,release_status,custom_list,
 			progress_volumes,progress_chapters,progress_pages,progress_seasons,progress_episodes,progress_minutes,
 			progress_total_chapters,progress_total_episodes,
@@ -225,6 +234,24 @@ func (s *Store) GetTitle(id int64) (*Title, error) {
 		t.Images = append(t.Images, f)
 	}
 	iRows.Close()
+
+	rRows, err := s.db.Query(`SELECT r.related_id, r.label,
+			COALESCE((SELECT value FROM title_names WHERE title_id=r.related_id
+				ORDER BY CASE kind WHEN 'russian' THEN 0 WHEN 'english' THEN 1 ELSE 2 END, id LIMIT 1),''),
+			COALESCE((SELECT cover FROM titles WHERE id=r.related_id),'')
+		FROM title_relations r WHERE r.title_id=? ORDER BY r.id`, id)
+	if err != nil {
+		return nil, err
+	}
+	for rRows.Next() {
+		var r TitleRelation
+		if err := rRows.Scan(&r.RelatedID, &r.Label, &r.Name, &r.Cover); err != nil {
+			rRows.Close()
+			return nil, err
+		}
+		t.Relations = append(t.Relations, r)
+	}
+	rRows.Close()
 
 	return t, nil
 }
@@ -324,8 +351,39 @@ func (s *Store) SaveTitle(t Title) (int64, error) {
 			return 0, err
 		}
 	}
+	if err := saveRelations(tx, t.ID, t.Relations); err != nil {
+		return 0, err
+	}
 
 	return t.ID, tx.Commit()
+}
+
+func saveRelations(tx *sql.Tx, titleID int64, rels []TitleRelation) error {
+	if _, err := tx.Exec(`DELETE FROM title_relations WHERE title_id=?`, titleID); err != nil {
+		return err
+	}
+	for _, r := range rels {
+		if r.RelatedID == 0 || r.RelatedID == titleID {
+			continue
+		}
+		if _, err := tx.Exec(`INSERT INTO title_relations(title_id,related_id,label) VALUES(?,?,?)`,
+			titleID, r.RelatedID, strings.TrimSpace(r.Label)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Store) ReplaceTitleRelations(titleID int64, rels []TitleRelation) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err := saveRelations(tx, titleID, rels); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (s *Store) DeleteTitle(id int64) error {

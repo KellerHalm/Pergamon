@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
-	import { onMount, tick } from 'svelte';
+import { page } from '$app/stores';
+import { goto } from '$app/navigation';
+import { tick } from 'svelte';
 	import { titlesApi, coverApi, shelvesApi } from '$lib/api';
 	import {
 		STATUSES,
@@ -19,7 +19,8 @@
 		releaseStatusColor,
 		categoryLabel,
 		typeLabel,
-		progressForType
+		progressForType,
+		displayName
 	} from '$lib/constants';
 	import type { Title, Shelf } from '../../../app.d';
 	import ArrowLeft from 'lucide-svelte/icons/arrow-left';
@@ -47,6 +48,9 @@
 	let editShelfId = $state(0);
 	let editShelfInitial = $state(0);
 	let statusMenu = $state('');
+	let relCovers = $state<Record<number, string>>({});
+	let allTitles = $state<Title[]>([]);
+	let loadedId = 0;
 
 	const id = $derived(Number($page.params.id));
 	const editShelfOptions = $derived(shelves.filter((s) => s.kind === (title?.type ?? '')));
@@ -62,19 +66,27 @@
 		}
 	});
 
-	onMount(async () => {
-		await load();
+	$effect(() => {
+		if (id === loadedId) return;
+		loadedId = id;
+		load();
 	});
 
 	async function load() {
 		loading = true;
 		title = await titlesApi.get(id);
+		relCovers = {};
 		if (title) {
 			if (title.cover) {
 				coverUrl = await coverApi.dataURL(title.cover);
 			}
 			for (const f of title.images || []) {
 				await ensureThumb(f);
+			}
+			for (const r of title.relations || []) {
+				if (r.cover) {
+					relCovers[r.relatedId] = await coverApi.dataURL(r.cover);
+				}
 			}
 		}
 		loading = false;
@@ -136,10 +148,12 @@
 		editTitle.images = [...(editTitle.images || [])];
 		editTitle.genres = [...editTitle.genres];
 		editTitle.tags = [...editTitle.tags];
+		editTitle.relations = (editTitle.relations || []).map((r: any) => ({ relatedId: r.relatedId, label: r.label }));
 		for (const f of editTitle.images) {
 			await ensureThumb(f);
 		}
 		shelves = (await shelvesApi.list()) || [];
+		allTitles = (await titlesApi.list()) || [];
 		editShelfId = shelves.find((s) => s.titleIds.includes(id))?.id ?? 0;
 		editShelfInitial = editShelfId;
 		editing = true;
@@ -196,6 +210,16 @@
 	}
 	function removeTag(i: number) {
 		editTitle.tags.splice(i, 1);
+	}
+	function addRelation() {
+		editTitle.relations.push({ relatedId: 0, label: '' });
+	}
+	function removeRelation(i: number) {
+		editTitle.relations.splice(i, 1);
+	}
+	function relationCandidates(i: number) {
+		const picked = editTitle.relations.map((r: any, j: number) => (j === i ? 0 : r.relatedId));
+		return allTitles.filter((t) => t.id !== id && !picked.includes(t.id));
 	}
 
 	function onCoverInput(e: Event) {
@@ -422,6 +446,23 @@
 						<input class="input" bind:value={e.customList} />
 					</div>
 				{/if}
+
+				<div class="field">
+					<span class="label">Связи</span>
+					{#each e.relations as rel, i}
+						<div class="row-3">
+							<select class="select sm" bind:value={rel.relatedId}>
+								<option value={0} disabled hidden>Тайтл…</option>
+								{#each relationCandidates(i) as t (t.id)}
+									<option value={t.id}>{displayName(t.names)}</option>
+								{/each}
+							</select>
+							<input class="input" placeholder="Какая это связь (например, продолжение)…" bind:value={rel.label} />
+							<button class="btn btn-icon sm" onclick={() => removeRelation(i)}><Minus size={14} /></button>
+						</div>
+					{/each}
+					<button class="btn sm" onclick={addRelation}><Plus size={14} /> Добавить связь</button>
+				</div>
 
 				<div class="field">
 					<span class="label">Прогресс</span>
@@ -657,6 +698,27 @@
 						{/if}
 					</div>
 				</section>
+
+			{#if title.relations.length > 0}
+				<section class="section">
+					<h3>Связи</h3>
+					<div class="relations">
+						{#each title.relations as r (r.relatedId + ':' + r.label)}
+							<button class="relation" onclick={() => goto(`/title/${r.relatedId}`)}>
+								{#if relCovers[r.relatedId]}
+									<img src={relCovers[r.relatedId]} alt="" />
+								{:else}
+									<span class="rel-ph">{(r.name || '?').slice(0, 1).toUpperCase()}</span>
+								{/if}
+								<span class="rel-info">
+									{#if r.label}<span class="rel-label">{r.label}</span>{/if}
+									<span class="rel-name">{r.name || 'Без названия'}</span>
+								</span>
+							</button>
+						{/each}
+					</div>
+				</section>
+			{/if}
 
 			{#if lightboxIdx >= 0 && title}
 				<div class="lightbox">
@@ -989,6 +1051,63 @@
 		font-weight: 700;
 		min-width: 40px;
 		text-align: center;
+	}
+
+	.relations {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.relation {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 8px 12px;
+		background: var(--bg-elev);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		text-align: left;
+		cursor: pointer;
+		width: 100%;
+	}
+	.relation:hover {
+		background: var(--bg-elev-2);
+	}
+	.relation img {
+		width: 36px;
+		height: 50px;
+		object-fit: cover;
+		border-radius: 4px;
+		flex: none;
+	}
+	.rel-ph {
+		width: 36px;
+		height: 50px;
+		border-radius: 4px;
+		background: var(--bg-elev-2);
+		color: var(--accent);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 700;
+		flex: none;
+	}
+	.rel-info {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+	}
+	.rel-label {
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--accent);
+	}
+	.rel-name {
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--text);
 	}
 
 	.edit-panel {

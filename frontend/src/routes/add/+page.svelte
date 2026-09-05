@@ -13,7 +13,8 @@
 		CREATOR_ROLES,
 		READ_PROGRESS,
 		WATCH_PROGRESS,
-		progressForType
+		progressForType,
+		displayName
 	} from '$lib/constants';
 	import type { Title, Shelf } from '../../app.d';
 	import Plus from 'lucide-svelte/icons/plus';
@@ -47,11 +48,14 @@
 	let error = $state('');
 	let shelves = $state<Shelf[]>([]);
 	let shelfId = $state(0);
+	let relations = $state<{ relatedId: number; label: string }[]>([]);
+	let allTitles = $state<Title[]>([]);
 
 	const typeShelves = $derived(shelves.filter((s) => s.kind === type));
 
 	onMount(async () => {
 		shelves = (await shelvesApi.list()) || [];
+		allTitles = (await titlesApi.list()) || [];
 	});
 
 	$effect(() => {
@@ -146,6 +150,7 @@
 				creators: creators.filter((c) => c.name.trim()),
 				genres: genres.filter((g) => g.trim()),
 				tags: tags.filter((t) => t.trim()),
+				relations: relations.filter((r) => r.relatedId > 0),
 				score,
 				status,
 				releaseStatus,
@@ -181,6 +186,12 @@
 	function addCreator() { creators.push({ role: 'author', name: '' }); }
 	function addGenre() { genres.push(''); }
 	function addTag() { tags.push(''); }
+	function addRelation() { relations.push({ relatedId: 0, label: '' }); }
+
+	function relationCandidates(i: number) {
+		const picked = relations.map((r, j) => (j === i ? 0 : r.relatedId));
+		return allTitles.filter((t) => !picked.includes(t.id));
+	}
 </script>
 
 <div class="page">
@@ -354,6 +365,23 @@
 		<div class="field">
 			<span class="label">Свой список</span>
 			<input class="input" placeholder="Название пользовательского списка…" bind:value={customList} />
+		</div>
+
+		<div class="field">
+			<span class="label">Связи</span>
+			{#each relations as rel, i}
+				<div class="row-3">
+					<select class="select sm" bind:value={rel.relatedId}>
+						<option value={0} disabled hidden>Тайтл…</option>
+						{#each relationCandidates(i) as t (t.id)}
+							<option value={t.id}>{displayName(t.names)}</option>
+						{/each}
+					</select>
+					<input class="input" placeholder="Какая это связь (например, продолжение)…" bind:value={rel.label} />
+					<button class="btn btn-icon sm" onclick={() => relations.splice(i, 1)}><Minus size={14} /></button>
+				</div>
+			{/each}
+			<button class="btn sm" onclick={addRelation}><Plus size={14} /> Добавить связь</button>
 		</div>
 
 		<div class="field">

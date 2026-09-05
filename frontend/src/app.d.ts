@@ -47,6 +47,13 @@ export interface Creator {
 	name: string;
 }
 
+export interface Relation {
+	relatedId: number;
+	label: string;
+	name?: string;
+	cover?: string;
+}
+
 export interface Progress {
 	volumes: number;
 	chapters: number;
@@ -69,6 +76,7 @@ export interface Title {
 	creators: Creator[];
 	genres: string[];
 	tags: string[];
+	relations: Relation[];
 	score: number;
 	status: string;
 	releaseStatus: string;

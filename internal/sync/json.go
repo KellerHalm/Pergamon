@@ -45,16 +45,39 @@ func importJSON(s *store.Store, r io.Reader) error {
 	if err := dec.Decode(&b); err != nil {
 		return err
 	}
+	type pendingRelations struct {
+		newID int64
+		rels  []store.TitleRelation
+	}
 	idMap := make(map[int64]int64)
+	var pending []pendingRelations
 	for _, t := range b.Titles {
 		oldID := t.ID
+		rels := t.Relations
 		t.ID = 0
+		t.Relations = nil
 		newID, err := s.SaveTitle(t)
 		if err != nil {
 			return err
 		}
 		if oldID != 0 {
 			idMap[oldID] = newID
+		}
+		if len(rels) > 0 {
+			pending = append(pending, pendingRelations{newID: newID, rels: rels})
+		}
+	}
+	for _, p := range pending {
+		remapped := make([]store.TitleRelation, 0, len(p.rels))
+		for _, rel := range p.rels {
+			if id, ok := idMap[rel.RelatedID]; ok {
+				remapped = append(remapped, store.TitleRelation{RelatedID: id, Label: rel.Label})
+			}
+		}
+		if len(remapped) > 0 {
+			if err := s.ReplaceTitleRelations(p.newID, remapped); err != nil {
+				return err
+			}
 		}
 	}
 	for _, sh := range b.Shelves {
