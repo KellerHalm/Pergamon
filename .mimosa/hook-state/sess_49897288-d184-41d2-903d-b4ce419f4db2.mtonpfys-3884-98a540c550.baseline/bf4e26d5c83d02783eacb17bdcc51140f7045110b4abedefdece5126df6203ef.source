@@ -1,1 +1,0 @@
-import{a as s,f as t}from"../chunks/BwWQI0Re.js";import"../chunks/D7qjkSpV.js";import{C as i,z as e,B as m}from"../chunks/CjuUICSG.js";import{S as p}from"../chunks/ClvZXI0K.js";var l=t('<div class="page svelte-1izhtlf"><h1 class="svelte-1izhtlf">Добавить студию</h1> <!></div>');function h(a){var o=l(),r=i(e(o),2);p(r,{}),m(o),s(a,o)}export{h as component};

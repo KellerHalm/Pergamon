@@ -150,7 +150,7 @@
 
 		{#if studio.description}
 			<section class="section">
-				<h3>Описание</h3>
+				<h3>Биография</h3>
 				<p class="synopsis">{studio.description}</p>
 			</section>
 		{/if}

@@ -154,7 +154,7 @@
 
 		{#if person.description}
 			<section class="section">
-				<h3>Описание</h3>
+				<h3>Биография</h3>
 				<p class="synopsis">{person.description}</p>
 			</section>
 		{/if}

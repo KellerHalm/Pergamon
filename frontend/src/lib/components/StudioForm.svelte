@@ -220,7 +220,7 @@
 	</div>
 
 	<div class="field">
-		<span class="label">Описание</span>
+		<span class="label">Биография</span>
 		<textarea class="textarea" rows={4} bind:value={description} placeholder="История студии…"></textarea>
 	</div>
 
