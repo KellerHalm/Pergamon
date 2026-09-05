@@ -8,11 +8,12 @@ import (
 )
 
 type backupFile struct {
-	Version  int           `json:"version"`
-	Exported string        `json:"exported"`
-	Titles   []store.Title `json:"titles"`
-	Shelves  []store.Shelf `json:"shelves"`
-	Notes    []store.Note  `json:"notes,omitempty"`
+	Version    int                `json:"version"`
+	Exported   string             `json:"exported"`
+	Titles     []store.Title      `json:"titles"`
+	Shelves    []store.Shelf      `json:"shelves"`
+	Notes      []store.Note       `json:"notes,omitempty"`
+	Characters []store.Character  `json:"characters,omitempty"`
 }
 
 func exportJSON(s *store.Store, w io.Writer) error {
@@ -28,11 +29,16 @@ func exportJSON(s *store.Store, w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	characters, err := s.ListCharacters("")
+	if err != nil {
+		return err
+	}
 	b := backupFile{
-		Version: 1,
-		Titles:  titles,
-		Shelves: shelves,
-		Notes:   notes,
+		Version:    2,
+		Titles:     titles,
+		Shelves:    shelves,
+		Notes:      notes,
+		Characters: characters,
 	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
@@ -56,6 +62,7 @@ func importJSON(s *store.Store, r io.Reader) error {
 		rels := t.Relations
 		t.ID = 0
 		t.Relations = nil
+		t.Characters = nil
 		newID, err := s.SaveTitle(t)
 		if err != nil {
 			return err
@@ -76,6 +83,34 @@ func importJSON(s *store.Store, r io.Reader) error {
 		}
 		if len(remapped) > 0 {
 			if err := s.ReplaceTitleRelations(p.newID, remapped); err != nil {
+				return err
+			}
+		}
+	}
+	type pendingCharacter struct {
+		newID    int64
+		titleIDs []int64
+	}
+	var pendingChars []pendingCharacter
+	for _, c := range b.Characters {
+		titleIDs := c.TitleIDs
+		c.ID = 0
+		c.TitleIDs = nil
+		newID, err := s.SaveCharacter(c)
+		if err != nil {
+			return err
+		}
+		pendingChars = append(pendingChars, pendingCharacter{newID: newID, titleIDs: titleIDs})
+	}
+	for _, pc := range pendingChars {
+		remapped := make([]int64, 0, len(pc.titleIDs))
+		for _, tid := range pc.titleIDs {
+			if id, ok := idMap[tid]; ok {
+				remapped = append(remapped, id)
+			}
+		}
+		if len(remapped) > 0 {
+			if err := s.SetCharacterTitles(pc.newID, remapped); err != nil {
 				return err
 			}
 		}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { titlesApi, coverApi, shelvesApi } from '$lib/api';
+	import { titlesApi, coverApi, shelvesApi, charactersApi } from '$lib/api';
 	import {
 		TYPES,
 		ALL_CATEGORIES,
@@ -16,7 +16,7 @@
 		progressForType,
 		displayName
 	} from '$lib/constants';
-	import type { Title, Shelf } from '../../app.d';
+	import type { Title, Shelf, Character } from '../../app.d';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Minus from 'lucide-svelte/icons/minus';
 	import ImagePlus from 'lucide-svelte/icons/image-plus';
@@ -50,12 +50,15 @@
 	let shelfId = $state(0);
 	let relations = $state<{ relatedId: number; label: string; reverseLabel: string }[]>([]);
 	let allTitles = $state<Title[]>([]);
+	let charRefs = $state<{ id: number }[]>([]);
+	let allCharacters = $state<Character[]>([]);
 
 	const typeShelves = $derived(shelves.filter((s) => s.kind === type));
 
 	onMount(async () => {
 		shelves = (await shelvesApi.list()) || [];
 		allTitles = (await titlesApi.list()) || [];
+		allCharacters = (await charactersApi.list('name')) || [];
 	});
 
 	$effect(() => {
@@ -151,6 +154,7 @@
 				genres: genres.filter((g) => g.trim()),
 				tags: tags.filter((t) => t.trim()),
 				relations: relations.filter((r) => r.relatedId > 0),
+				characters: charRefs.filter((c) => c.id > 0),
 				score,
 				status,
 				releaseStatus,
@@ -187,6 +191,12 @@
 	function addGenre() { genres.push(''); }
 	function addTag() { tags.push(''); }
 	function addRelation() { relations.push({ relatedId: 0, label: '', reverseLabel: '' }); }
+
+	function addCharRef() { charRefs.push({ id: 0 }); }
+	function charCandidates(i: number) {
+		const picked = charRefs.map((c, j) => (j === i ? 0 : c.id));
+		return allCharacters.filter((c) => !picked.includes(c.id));
+	}
 
 	function relationCandidates(i: number) {
 		const picked = relations.map((r, j) => (j === i ? 0 : r.relatedId));
@@ -368,6 +378,23 @@
 		</div>
 
 		<div class="field">
+			<span class="label">Персонажи</span>
+			{#each charRefs as char, i}
+				<div class="row-2">
+					<select class="select sm" bind:value={char.id}>
+						<option value={0} disabled hidden>Персонаж…</option>
+						{#each charCandidates(i) as c (c.id)}
+							<option value={c.id}>{displayName(c.names)}</option>
+						{/each}
+					</select>
+					<button class="btn btn-icon sm" onclick={() => charRefs.splice(i, 1)}><Minus size={14} /></button>
+				</div>
+			{/each}
+			<button class="btn sm" onclick={addCharRef}><Plus size={14} /> Добавить персонажа</button>
+			<span class="rel-hint">Список персонажей создаётся в разделе «Персонажи»; здесь выбираются уже добавленные.</span>
+		</div>
+
+		<div class="field">
 			<span class="label">Связи</span>
 			{#each relations as rel, i}
 				<div class="rel-edit">
@@ -469,6 +496,12 @@
 		flex-direction: column;
 		gap: 6px;
 		margin-bottom: 8px;
+	}
+	.rel-hint {
+		display: block;
+		font-size: 11px;
+		color: var(--text-dim);
+		margin-top: 6px;
 	}
 	.sm {
 		width: auto;

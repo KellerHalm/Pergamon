@@ -140,6 +140,22 @@ func (a *App) SetShelfItems(shelfID int64, titleIDs []int64) error {
 	return a.store.SetShelfItems(shelfID, titleIDs)
 }
 
+func (a *App) ListCharacters(sort string) ([]store.Character, error) {
+	return a.store.ListCharacters(sort)
+}
+
+func (a *App) GetCharacter(id int64) (*store.Character, error) {
+	return a.store.GetCharacter(id)
+}
+
+func (a *App) SaveCharacter(c store.Character) (int64, error) {
+	return a.store.SaveCharacter(c)
+}
+
+func (a *App) DeleteCharacter(id int64) error {
+	return a.store.DeleteCharacter(id)
+}
+
 func (a *App) GetSetting(key string) string {
 	v, _ := a.store.GetSetting(key)
 	return v

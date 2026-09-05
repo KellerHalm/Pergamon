@@ -18,6 +18,10 @@ declare global {
 					SaveShelf(s: Shelf): Promise<number>;
 					DeleteShelf(id: number): Promise<void>;
 					SetShelfItems(shelfId: number, titleIds: number[]): Promise<void>;
+					ListCharacters(sort: string): Promise<Character[]>;
+					GetCharacter(id: number): Promise<Character>;
+					SaveCharacter(c: Character): Promise<number>;
+					DeleteCharacter(id: number): Promise<void>;
 					GetSetting(key: string): Promise<string>;
 					SetSetting(key: string, value: string): Promise<void>;
 					UploadCoverDataURL(dataUrl: string): Promise<string>;
@@ -81,6 +85,7 @@ export interface Title {
 	tags: string[];
 	relations: Relation[];
 	reverseRelations?: Relation[];
+	characters: CharacterRef[];
 	score: number;
 	status: string;
 	releaseStatus: string;
@@ -88,6 +93,32 @@ export interface Title {
 	progress: Progress;
 	notes: string;
 	spineColor: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface CharacterRef {
+	id: number;
+	name?: string;
+	mainImage?: string;
+}
+
+export interface TitleRef {
+	id: number;
+	name: string;
+	cover: string;
+	status: string;
+}
+
+export interface Character {
+	id: number;
+	names: Name[];
+	mainImage: string;
+	age: string;
+	description: string;
+	images: string[];
+	titles: TitleRef[];
+	titleIds: number[];
 	createdAt: string;
 	updatedAt: string;
 }

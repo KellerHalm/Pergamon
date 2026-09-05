@@ -2,7 +2,7 @@
 import { page } from '$app/stores';
 import { goto } from '$app/navigation';
 import { tick } from 'svelte';
-	import { titlesApi, coverApi, shelvesApi } from '$lib/api';
+	import { titlesApi, coverApi, shelvesApi, charactersApi } from '$lib/api';
 	import {
 		STATUSES,
 		RELEASE_STATUSES,
@@ -22,7 +22,7 @@ import { tick } from 'svelte';
 		progressForType,
 		displayName
 	} from '$lib/constants';
-	import type { Title, Shelf } from '../../../app.d';
+	import type { Title, Shelf, Character } from '../../../app.d';
 	import ArrowLeft from 'lucide-svelte/icons/arrow-left';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import Plus from 'lucide-svelte/icons/plus';
@@ -50,6 +50,8 @@ import { tick } from 'svelte';
 	let statusMenu = $state('');
 	let relCovers = $state<Record<number, string>>({});
 	let allTitles = $state<Title[]>([]);
+	let allCharacters = $state<Character[]>([]);
+	let charImgUrls = $state<Record<number, string>>({});
 	let loadedId = 0;
 
 	const id = $derived(Number($page.params.id));
@@ -82,6 +84,7 @@ import { tick } from 'svelte';
 		loading = true;
 		title = await titlesApi.get(id);
 		relCovers = {};
+		charImgUrls = {};
 		if (title) {
 			if (title.cover) {
 				coverUrl = await coverApi.dataURL(title.cover);
@@ -92,6 +95,11 @@ import { tick } from 'svelte';
 			for (const r of [...(title.relations || []), ...(title.reverseRelations || [])]) {
 				if (r.cover && relCovers[r.relatedId] === undefined) {
 					relCovers[r.relatedId] = await coverApi.dataURL(r.cover);
+				}
+			}
+			for (const c of title.characters || []) {
+				if (c.mainImage && charImgUrls[c.id] === undefined) {
+					charImgUrls[c.id] = await coverApi.dataURL(c.mainImage);
 				}
 			}
 		}
@@ -170,6 +178,8 @@ import { tick } from 'svelte';
 		}
 		shelves = (await shelvesApi.list()) || [];
 		allTitles = (await titlesApi.list()) || [];
+		allCharacters = (await charactersApi.list('name')) || [];
+		editTitle.characters = (editTitle.characters || []).map((c: any) => ({ id: c.id }));
 		editShelfId = shelves.find((s) => s.titleIds.includes(id))?.id ?? 0;
 		editShelfInitial = editShelfId;
 		editing = true;
@@ -243,6 +253,17 @@ import { tick } from 'svelte';
 	function relationCandidates(i: number) {
 		const picked = editTitle.relations.map((r: any, j: number) => (j === i ? 0 : r.relatedId));
 		return allTitles.filter((t) => t.id !== id && !picked.includes(t.id));
+	}
+
+	function addCharRef() {
+		editTitle.characters.push({ id: 0 });
+	}
+	function removeCharRef(i: number) {
+		editTitle.characters.splice(i, 1);
+	}
+	function charCandidates(i: number) {
+		const picked = editTitle.characters.map((c: any, j: number) => (j === i ? 0 : c.id));
+		return allCharacters.filter((c) => !picked.includes(c.id));
 	}
 
 	function onCoverInput(e: Event) {
@@ -469,6 +490,23 @@ import { tick } from 'svelte';
 						<input class="input" bind:value={e.customList} />
 					</div>
 				{/if}
+
+				<div class="field">
+					<span class="label">Персонажи</span>
+					{#each editTitle.characters as char, i}
+						<div class="row-2">
+							<select class="select sm" bind:value={char.id}>
+								<option value={0} disabled hidden>Персонаж…</option>
+								{#each charCandidates(i) as c (c.id)}
+									<option value={c.id}>{displayName(c.names)}</option>
+								{/each}
+							</select>
+							<button class="btn btn-icon sm" onclick={() => removeCharRef(i)}><Minus size={14} /></button>
+						</div>
+					{/each}
+					<button class="btn sm" onclick={addCharRef}><Plus size={14} /> Добавить персонажа</button>
+					<span class="rel-hint">Список персонажей создаётся в разделе «Персонажи»; здесь выбираются уже добавленные.</span>
+				</div>
 
 				<div class="field">
 					<span class="label">Связи</span>
@@ -743,6 +781,26 @@ import { tick } from 'svelte';
 						{/if}
 					</div>
 				</section>
+
+			{#if title.characters.length > 0}
+				<section class="section">
+					<h3>Персонажи</h3>
+					<div class="relations">
+						{#each title.characters as c (c.id)}
+							<button class="rel-card" onclick={() => goto(`/character/${c.id}`)}>
+								<span class="rel-poster">
+									{#if charImgUrls[c.id]}
+										<img src={charImgUrls[c.id]} alt="" />
+									{:else}
+										<span class="rel-ph">{(c.name || '?').slice(0, 1).toUpperCase()}</span>
+									{/if}
+									<span class="rel-name">{c.name || 'Без имени'}</span>
+								</span>
+							</button>
+						{/each}
+					</div>
+				</section>
+			{/if}
 
 			{#if displayRelations.length > 0}
 				<section class="section">

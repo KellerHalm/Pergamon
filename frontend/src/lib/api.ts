@@ -1,4 +1,4 @@
-import type { ListQuery, Note, Relation, Shelf, SyncResult, Title, WebDAVConfig } from '../app.d';
+import type { Character, ListQuery, Note, Relation, Shelf, SyncResult, Title, WebDAVConfig } from '../app.d';
 
 const api = () => window.go.main.App;
 
@@ -27,6 +27,13 @@ export const shelvesApi = {
 	save: (s: Shelf) => api().SaveShelf(s),
 	delete: (id: number) => api().DeleteShelf(id),
 	setItems: (shelfId: number, ids: number[]) => api().SetShelfItems(shelfId, ids)
+};
+
+export const charactersApi = {
+	list: (sort: string = '') => api().ListCharacters(sort) as Promise<Character[]>,
+	get: (id: number) => api().GetCharacter(id) as Promise<Character>,
+	save: (c: Character) => api().SaveCharacter(c),
+	delete: (id: number) => api().DeleteCharacter(id)
 };
 
 export const settingsApi = {

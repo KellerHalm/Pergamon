@@ -108,6 +108,32 @@ func (s *Store) migrate() error {
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 		)`,
+		`CREATE TABLE IF NOT EXISTS characters (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			main_image TEXT DEFAULT '',
+			age TEXT DEFAULT '',
+			description TEXT DEFAULT '',
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS character_names (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			kind TEXT NOT NULL,
+			value TEXT NOT NULL
+		)`,
+		`CREATE TABLE IF NOT EXISTS character_images (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			file TEXT NOT NULL,
+			position INTEGER NOT NULL DEFAULT 0
+		)`,
+		`CREATE TABLE IF NOT EXISTS title_characters (
+			title_id INTEGER NOT NULL REFERENCES titles(id) ON DELETE CASCADE,
+			character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			position INTEGER NOT NULL DEFAULT 0,
+			PRIMARY KEY (title_id, character_id)
+		)`,
 		`CREATE TABLE IF NOT EXISTS settings (
 			key TEXT PRIMARY KEY,
 			value TEXT NOT NULL DEFAULT ''
@@ -122,6 +148,10 @@ func (s *Store) migrate() error {
 		`CREATE INDEX IF NOT EXISTS idx_title_images_title ON title_images(title_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_title_notes_title ON title_notes(title_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_title_relations_title ON title_relations(title_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_character_names_value ON character_names(value)`,
+		`CREATE INDEX IF NOT EXISTS idx_character_images_character ON character_images(character_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_title_characters_title ON title_characters(title_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_title_characters_character ON title_characters(character_id)`,
 	}
 	for _, st := range stmts {
 		if _, err := s.db.Exec(st); err != nil {

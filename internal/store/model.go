@@ -25,6 +25,32 @@ type TitleRelation struct {
 	Status       string `json:"status"`
 }
 
+type CharacterRef struct {
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	MainImage string `json:"mainImage"`
+}
+
+type TitleRef struct {
+	ID     int64  `json:"id"`
+	Name   string `json:"name"`
+	Cover  string `json:"cover"`
+	Status string `json:"status"`
+}
+
+type Character struct {
+	ID          int64        `json:"id"`
+	Names       []Name       `json:"names"`
+	MainImage   string       `json:"mainImage"`
+	Age         string       `json:"age"`
+	Description string       `json:"description"`
+	Images      []string     `json:"images"`
+	Titles      []TitleRef   `json:"titles"`
+	TitleIDs    []int64      `json:"titleIds"`
+	CreatedAt   string       `json:"createdAt"`
+	UpdatedAt   string       `json:"updatedAt"`
+}
+
 type Progress struct {
 	Volumes       int `json:"volumes"`
 	Chapters      int `json:"chapters"`
@@ -49,6 +75,7 @@ type Title struct {
 	Tags             []string        `json:"tags"`
 	Relations        []TitleRelation `json:"relations"`
 	ReverseRelations []TitleRelation `json:"reverseRelations"`
+	Characters       []CharacterRef  `json:"characters"`
 	Score            float64         `json:"score"`
 	Status           string          `json:"status"`
 	ReleaseStatus    string          `json:"releaseStatus"`
@@ -156,7 +183,7 @@ func (s *Store) ListTitles(f ListFilter) ([]Title, error) {
 
 func (s *Store) GetTitle(id int64) (*Title, error) {
 	t := &Title{Names: []Name{}, Creators: []Creator{}, Genres: []string{}, Tags: []string{}, Images: []string{},
-		Relations: []TitleRelation{}, ReverseRelations: []TitleRelation{}}
+		Relations: []TitleRelation{}, ReverseRelations: []TitleRelation{}, Characters: []CharacterRef{}}
 	err := s.db.QueryRow(`SELECT id,type,category,cover,synopsis,score,status,release_status,custom_list,
 			progress_volumes,progress_chapters,progress_pages,progress_seasons,progress_episodes,progress_minutes,
 			progress_total_chapters,progress_total_episodes,
@@ -277,6 +304,25 @@ func (s *Store) GetTitle(id int64) (*Title, error) {
 	}
 	vRows.Close()
 
+	chRows, err := s.db.Query(`SELECT c.id,
+			COALESCE((SELECT value FROM character_names WHERE character_id=c.id
+				ORDER BY CASE kind WHEN 'russian' THEN 0 WHEN 'english' THEN 1 ELSE 2 END, id LIMIT 1),''),
+			COALESCE(c.main_image,'')
+		FROM title_characters tc JOIN characters c ON c.id=tc.character_id
+		WHERE tc.title_id=? ORDER BY tc.position, tc.rowid`, id)
+	if err != nil {
+		return nil, err
+	}
+	for chRows.Next() {
+		var cr CharacterRef
+		if err := chRows.Scan(&cr.ID, &cr.Name, &cr.MainImage); err != nil {
+			chRows.Close()
+			return nil, err
+		}
+		t.Characters = append(t.Characters, cr)
+	}
+	chRows.Close()
+
 	return t, nil
 }
 
@@ -378,8 +424,213 @@ func (s *Store) SaveTitle(t Title) (int64, error) {
 	if err := saveRelations(tx, t.ID, t.Relations); err != nil {
 		return 0, err
 	}
+	if err := saveTitleCharacters(tx, t.ID, t.Characters); err != nil {
+		return 0, err
+	}
 
 	return t.ID, tx.Commit()
+}
+
+func saveTitleCharacters(tx *sql.Tx, titleID int64, chars []CharacterRef) error {
+	if _, err := tx.Exec(`DELETE FROM title_characters WHERE title_id=?`, titleID); err != nil {
+		return err
+	}
+	for i, c := range chars {
+		if c.ID == 0 {
+			continue
+		}
+		if _, err := tx.Exec(`INSERT OR IGNORE INTO title_characters(title_id,character_id,position)
+			SELECT ?,?,? WHERE EXISTS(SELECT 1 FROM characters WHERE id=?)`, titleID, c.ID, i, c.ID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func replaceCharacterTitles(tx *sql.Tx, characterID int64, titleIDs []int64) error {
+	if _, err := tx.Exec(`DELETE FROM title_characters WHERE character_id=?`, characterID); err != nil {
+		return err
+	}
+	for i, id := range titleIDs {
+		if id == 0 {
+			continue
+		}
+		if _, err := tx.Exec(`INSERT OR IGNORE INTO title_characters(title_id,character_id,position)
+			SELECT ?,?,? WHERE EXISTS(SELECT 1 FROM titles WHERE id=?)`, id, characterID, i, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Store) ListCharacters(sort string) ([]Character, error) {
+	q := `SELECT id FROM characters`
+	switch sort {
+	case "name":
+		q += ` ORDER BY (SELECT value FROM character_names WHERE character_id=characters.id ORDER BY kind LIMIT 1)`
+	case "updated":
+		q += ` ORDER BY updated_at DESC`
+	default:
+		q += ` ORDER BY created_at DESC, id DESC`
+	}
+	rows, err := s.db.Query(q)
+	if err != nil {
+		return nil, err
+	}
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	rows.Close()
+
+	out := make([]Character, 0, len(ids))
+	for _, id := range ids {
+		c, err := s.GetCharacter(id)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, *c)
+	}
+	return out, nil
+}
+
+func (s *Store) GetCharacter(id int64) (*Character, error) {
+	c := &Character{Names: []Name{}, Images: []string{}, Titles: []TitleRef{}, TitleIDs: []int64{}}
+	err := s.db.QueryRow(`SELECT id,COALESCE(main_image,''),COALESCE(age,''),COALESCE(description,''),
+			created_at,updated_at FROM characters WHERE id=?`, id).Scan(
+		&c.ID, &c.MainImage, &c.Age, &c.Description, &c.CreatedAt, &c.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	nRows, err := s.db.Query(`SELECT kind,value FROM character_names WHERE character_id=? ORDER BY id`, id)
+	if err != nil {
+		return nil, err
+	}
+	for nRows.Next() {
+		var n Name
+		if err := nRows.Scan(&n.Kind, &n.Value); err != nil {
+			nRows.Close()
+			return nil, err
+		}
+		c.Names = append(c.Names, n)
+	}
+	nRows.Close()
+
+	iRows, err := s.db.Query(`SELECT file FROM character_images WHERE character_id=? ORDER BY position, id`, id)
+	if err != nil {
+		return nil, err
+	}
+	for iRows.Next() {
+		var f string
+		if err := iRows.Scan(&f); err != nil {
+			iRows.Close()
+			return nil, err
+		}
+		c.Images = append(c.Images, f)
+	}
+	iRows.Close()
+
+	tRows, err := s.db.Query(`SELECT tc.title_id,
+			COALESCE((SELECT value FROM title_names WHERE title_id=tc.title_id
+				ORDER BY CASE kind WHEN 'russian' THEN 0 WHEN 'english' THEN 1 ELSE 2 END, id LIMIT 1),''),
+			COALESCE((SELECT cover FROM titles WHERE id=tc.title_id),''),
+			COALESCE((SELECT status FROM titles WHERE id=tc.title_id),'')
+		FROM title_characters tc WHERE tc.character_id=? ORDER BY tc.position, tc.rowid`, id)
+	if err != nil {
+		return nil, err
+	}
+	for tRows.Next() {
+		var tr TitleRef
+		if err := tRows.Scan(&tr.ID, &tr.Name, &tr.Cover, &tr.Status); err != nil {
+			tRows.Close()
+			return nil, err
+		}
+		c.Titles = append(c.Titles, tr)
+		c.TitleIDs = append(c.TitleIDs, tr.ID)
+	}
+	tRows.Close()
+
+	return c, nil
+}
+
+func (s *Store) SaveCharacter(c Character) (int64, error) {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	if c.ID == 0 {
+		res, err := tx.Exec(`INSERT INTO characters(main_image,age,description,created_at,updated_at)
+			VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`, c.MainImage, c.Age, c.Description)
+		if err != nil {
+			return 0, err
+		}
+		c.ID, err = res.LastInsertId()
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		_, err := tx.Exec(`UPDATE characters SET main_image=?,age=?,description=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`,
+			c.MainImage, c.Age, c.Description, c.ID)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	if _, err := tx.Exec(`DELETE FROM character_names WHERE character_id=?`, c.ID); err != nil {
+		return 0, err
+	}
+	for _, n := range c.Names {
+		if strings.TrimSpace(n.Value) == "" {
+			continue
+		}
+		if _, err := tx.Exec(`INSERT INTO character_names(character_id,kind,value) VALUES(?,?,?)`, c.ID, n.Kind, n.Value); err != nil {
+			return 0, err
+		}
+	}
+	if _, err := tx.Exec(`DELETE FROM character_images WHERE character_id=?`, c.ID); err != nil {
+		return 0, err
+	}
+	for i, f := range c.Images {
+		f = strings.TrimSpace(f)
+		if f == "" {
+			continue
+		}
+		if _, err := tx.Exec(`INSERT INTO character_images(character_id,file,position) VALUES(?,?,?)`, c.ID, f, i); err != nil {
+			return 0, err
+		}
+	}
+	if c.TitleIDs != nil {
+		if err := replaceCharacterTitles(tx, c.ID, c.TitleIDs); err != nil {
+			return 0, err
+		}
+	}
+
+	return c.ID, tx.Commit()
+}
+
+func (s *Store) SetCharacterTitles(characterID int64, titleIDs []int64) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err := replaceCharacterTitles(tx, characterID, titleIDs); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *Store) DeleteCharacter(id int64) error {
+	_, err := s.db.Exec(`DELETE FROM characters WHERE id=?`, id)
+	return err
 }
 
 func saveRelations(tx *sql.Tx, titleID int64, rels []TitleRelation) error {
