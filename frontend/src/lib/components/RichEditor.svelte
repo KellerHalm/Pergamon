@@ -25,7 +25,7 @@
 <div class="editor" bind:this={el}></div>
 
 <style>
-	.editor {
+	.editor :global(.tiptap) {
 		min-height: 120px;
 		padding: 10px 14px;
 		border-radius: var(--radius-sm);
@@ -36,7 +36,7 @@
 		font-size: 14px;
 		line-height: 1.6;
 	}
-	.editor:focus-within {
+	.editor:focus-within :global(.tiptap) {
 		border-color: var(--accent);
 	}
 	.editor :global(p) {

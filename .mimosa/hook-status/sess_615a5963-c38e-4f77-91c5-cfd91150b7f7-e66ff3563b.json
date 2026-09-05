@@ -1,14 +1,14 @@
 {
   "schemaVersion": "mimosa-hook-status/v1",
-  "recordedAt": "2026-09-05T09:04:31.676Z",
+  "recordedAt": "2026-09-05T09:26:28.354Z",
   "sessionId": "sess_615a5963-c38e-4f77-91c5-cfd91150b7f7",
   "event": "PostToolUse",
   "toolName": "Edit",
-  "file": "cmd/notes_smoke/main.go",
+  "file": "frontend/src/routes/title/[id]/notes/+page.svelte",
   "outcome": "clear",
   "coverage": "complete",
   "findingCount": 0,
-  "durationMs": 16,
+  "durationMs": 9,
   "hostState": "hook_complete",
   "reportHint": ".mimosa/reports/"
 }

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import RichEditor from '$lib/components/RichEditor.svelte';
 	import { titlesApi, notesApi } from '$lib/api';
@@ -83,7 +82,7 @@
 
 <div class="page">
 	<div class="top">
-		<button class="btn" onclick={() => goto(`/title/${id}`)}>
+		<button class="btn" onclick={() => history.back()}>
 			<ArrowLeft size={16} />
 			Назад
 		</button>
