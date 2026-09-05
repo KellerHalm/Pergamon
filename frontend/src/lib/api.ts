@@ -1,4 +1,4 @@
-import type { ListQuery, Note, Shelf, SyncResult, Title, WebDAVConfig } from '../app.d';
+import type { ListQuery, Note, Relation, Shelf, SyncResult, Title, WebDAVConfig } from '../app.d';
 
 const api = () => window.go.main.App;
 
@@ -6,6 +6,7 @@ export const titlesApi = {
 	list: (q: ListQuery = {}) => api().ListTitles(q),
 	get: (id: number) => api().GetTitle(id),
 	save: (t: Title) => api().SaveTitle(t),
+	updateIncomingRelations: (id: number, rels: Relation[]) => api().UpdateIncomingRelations(id, rels),
 	delete: (id: number) => api().DeleteTitle(id),
 	adjustProgress: (id: number, field: string, delta: number) => api().AdjustProgress(id, field, delta)
 };

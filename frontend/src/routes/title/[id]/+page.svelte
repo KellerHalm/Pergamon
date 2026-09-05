@@ -56,8 +56,8 @@ import { tick } from 'svelte';
 	const editShelfOptions = $derived(shelves.filter((s) => s.kind === (title?.type ?? '')));
 	const displayRelations = $derived.by(() => {
 		if (!title) return [];
-		const own = (title.relations || []).map((r) => ({ id: r.relatedId, label: r.label, name: r.name || '', cover: r.cover || '' }));
-		const incoming = (title.reverseRelations || []).map((r) => ({ id: r.relatedId, label: r.label, name: r.name || '', cover: r.cover || '' }));
+		const own = (title.relations || []).map((r) => ({ id: r.relatedId, label: r.label, name: r.name || '', cover: r.cover || '', status: r.status || '' }));
+		const incoming = (title.reverseRelations || []).map((r) => ({ id: r.relatedId, label: r.label, name: r.name || '', cover: r.cover || '', status: r.status || '' }));
 		return [...own, ...incoming];
 	});
 	const SCORES = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
@@ -159,6 +159,12 @@ import { tick } from 'svelte';
 			label: r.label,
 			reverseLabel: r.reverseLabel || ''
 		}));
+		editTitle.reverseRelations = (editTitle.reverseRelations || []).map((r: any) => ({
+			relatedId: r.relatedId,
+			label: r.label,
+			reverseLabel: r.reverseLabel || '',
+			name: r.name || ''
+		}));
 		for (const f of editTitle.images) {
 			await ensureThumb(f);
 		}
@@ -172,6 +178,10 @@ import { tick } from 'svelte';
 	async function saveEdit() {
 		if (!editTitle) return;
 		await titlesApi.save(editTitle);
+		await titlesApi.updateIncomingRelations(
+			id,
+			(editTitle.reverseRelations || []).filter((r: any) => r.relatedId > 0)
+		);
 		if (editShelfId !== editShelfInitial) {
 			const current = shelves.filter((s) => s.titleIds.includes(id));
 			for (const s of current) {
@@ -226,6 +236,9 @@ import { tick } from 'svelte';
 	}
 	function removeRelation(i: number) {
 		editTitle.relations.splice(i, 1);
+	}
+	function removeIncomingRelation(i: number) {
+		editTitle.reverseRelations.splice(i, 1);
 	}
 	function relationCandidates(i: number) {
 		const picked = editTitle.relations.map((r: any, j: number) => (j === i ? 0 : r.relatedId));
@@ -459,6 +472,9 @@ import { tick } from 'svelte';
 
 				<div class="field">
 					<span class="label">Связи</span>
+					{#if e.reverseRelations.length > 0}
+						<span class="rel-group">Добавленные на этом тайтле</span>
+					{/if}
 					{#each e.relations as rel, i}
 						<div class="rel-edit">
 							<div class="row-3">
@@ -474,8 +490,23 @@ import { tick } from 'svelte';
 							<input class="input" placeholder="Метка на другом тайтле (например, «Экранизация»)…" bind:value={rel.reverseLabel} />
 						</div>
 					{/each}
+					{#if e.reverseRelations.length > 0}
+						<span class="rel-group">Добавленные на других тайтлах</span>
+						{#each e.reverseRelations as rel, i}
+							<div class="rel-edit">
+								<div class="row-3">
+									<select class="select sm" disabled>
+										<option value={rel.relatedId}>{rel.name || 'Тайтл'}</option>
+									</select>
+									<input class="input" placeholder="Метка здесь (например, «Источник»)…" bind:value={rel.label} />
+									<button class="btn btn-icon sm" onclick={() => removeIncomingRelation(i)}><Minus size={14} /></button>
+								</div>
+								<input class="input" placeholder="Метка на другом тайтле (например, «Экранизация»)…" bind:value={rel.reverseLabel} />
+							</div>
+						{/each}
+					{/if}
 					<button class="btn sm" onclick={addRelation}><Plus size={14} /> Добавить связь</button>
-					<span class="rel-hint">Связь редактируется только на тайтле, где она добавлена; у другого тайтла она отображается с встречной меткой.</span>
+					<span class="rel-hint">Связь можно редактировать с обоих тайтлов; удаление убирает её у обоих.</span>
 				</div>
 
 				<div class="field">
@@ -725,7 +756,7 @@ import { tick } from 'svelte';
 									{:else}
 										<span class="rel-ph">{(r.name || '?').slice(0, 1).toUpperCase()}</span>
 									{/if}
-									{#if r.label}<span class="rel-label">{r.label}</span>{/if}
+									{#if r.label}<span class="rel-label" style="background:{statusColor(r.status)}22;color:{statusColor(r.status)};border-color:{statusColor(r.status)}66">{r.label}</span>{/if}
 									<span class="rel-name">{r.name || 'Без названия'}</span>
 								</span>
 							</button>
@@ -1115,9 +1146,7 @@ import { tick } from 'svelte';
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		color: #fff;
-		background: rgba(0, 0, 0, 0.5);
-		border: 1px solid rgba(255, 255, 255, 0.4);
+		border: 1px solid transparent;
 		border-radius: 6px;
 		text-align: center;
 		pointer-events: none;
@@ -1169,6 +1198,14 @@ import { tick } from 'svelte';
 		flex-direction: column;
 		gap: 6px;
 		margin-bottom: 8px;
+	}
+	.rel-group {
+		display: block;
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--text-dim);
+		margin-bottom: 6px;
 	}
 	.rel-hint {
 		display: block;

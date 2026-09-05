@@ -89,6 +89,10 @@ func (a *App) SaveTitle(t store.Title) (int64, error) {
 	return a.store.SaveTitle(t)
 }
 
+func (a *App) UpdateIncomingRelations(titleID int64, rels []store.TitleRelation) error {
+	return a.store.UpdateIncomingRelations(titleID, rels)
+}
+
 func (a *App) DeleteTitle(id int64) error {
 	return a.store.DeleteTitle(id)
 }

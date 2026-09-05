@@ -22,6 +22,7 @@ type TitleRelation struct {
 	ReverseLabel string `json:"reverseLabel"`
 	Name         string `json:"name"`
 	Cover        string `json:"cover"`
+	Status       string `json:"status"`
 }
 
 type Progress struct {
@@ -239,6 +240,7 @@ func (s *Store) GetTitle(id int64) (*Title, error) {
 	iRows.Close()
 
 	rRows, err := s.db.Query(`SELECT r.related_id, r.label, r.reverse_label,
+			COALESCE((SELECT status FROM titles WHERE id=r.related_id),''),
 			COALESCE((SELECT value FROM title_names WHERE title_id=r.related_id
 				ORDER BY CASE kind WHEN 'russian' THEN 0 WHEN 'english' THEN 1 ELSE 2 END, id LIMIT 1),''),
 			COALESCE((SELECT cover FROM titles WHERE id=r.related_id),'')
@@ -248,7 +250,7 @@ func (s *Store) GetTitle(id int64) (*Title, error) {
 	}
 	for rRows.Next() {
 		var r TitleRelation
-		if err := rRows.Scan(&r.RelatedID, &r.Label, &r.ReverseLabel, &r.Name, &r.Cover); err != nil {
+		if err := rRows.Scan(&r.RelatedID, &r.Label, &r.ReverseLabel, &r.Status, &r.Name, &r.Cover); err != nil {
 			rRows.Close()
 			return nil, err
 		}
@@ -256,7 +258,8 @@ func (s *Store) GetTitle(id int64) (*Title, error) {
 	}
 	rRows.Close()
 
-	vRows, err := s.db.Query(`SELECT r.title_id, COALESCE(NULLIF(r.reverse_label,''), r.label), '',
+	vRows, err := s.db.Query(`SELECT r.title_id, COALESCE(NULLIF(r.reverse_label,''), r.label), r.label,
+			COALESCE((SELECT status FROM titles WHERE id=r.title_id),''),
 			COALESCE((SELECT value FROM title_names WHERE title_id=r.title_id
 				ORDER BY CASE kind WHEN 'russian' THEN 0 WHEN 'english' THEN 1 ELSE 2 END, id LIMIT 1),''),
 			COALESCE((SELECT cover FROM titles WHERE id=r.title_id),'')
@@ -266,7 +269,7 @@ func (s *Store) GetTitle(id int64) (*Title, error) {
 	}
 	for vRows.Next() {
 		var r TitleRelation
-		if err := vRows.Scan(&r.RelatedID, &r.Label, &r.ReverseLabel, &r.Name, &r.Cover); err != nil {
+		if err := vRows.Scan(&r.RelatedID, &r.Label, &r.ReverseLabel, &r.Status, &r.Name, &r.Cover); err != nil {
 			vRows.Close()
 			return nil, err
 		}
@@ -403,6 +406,28 @@ func (s *Store) ReplaceTitleRelations(titleID int64, rels []TitleRelation) error
 	defer tx.Rollback()
 	if err := saveRelations(tx, titleID, rels); err != nil {
 		return err
+	}
+	return tx.Commit()
+}
+
+func (s *Store) UpdateIncomingRelations(titleID int64, rels []TitleRelation) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.Exec(`DELETE FROM title_relations WHERE related_id=?`, titleID); err != nil {
+		return err
+	}
+	for _, r := range rels {
+		if r.RelatedID == 0 || r.RelatedID == titleID {
+			continue
+		}
+		if _, err := tx.Exec(`INSERT INTO title_relations(title_id,related_id,label,reverse_label) VALUES(?,?,?,?)`,
+			r.RelatedID, titleID, strings.TrimSpace(r.ReverseLabel), strings.TrimSpace(r.Label)); err != nil {
+			return err
+		}
 	}
 	return tx.Commit()
 }

@@ -6,6 +6,7 @@ declare global {
 					ListTitles(q: ListQuery): Promise<Title[]>;
 					GetTitle(id: number): Promise<Title>;
 					SaveTitle(t: Title): Promise<number>;
+					UpdateIncomingRelations(titleId: number, rels: Relation[]): Promise<void>;
 					DeleteTitle(id: number): Promise<void>;
 					AdjustProgress(id: number, field: string, delta: number): Promise<Title>;
 					ListNotes(titleId: number): Promise<Note[]>;
@@ -53,6 +54,7 @@ export interface Relation {
 	reverseLabel?: string;
 	name?: string;
 	cover?: string;
+	status?: string;
 }
 
 export interface Progress {

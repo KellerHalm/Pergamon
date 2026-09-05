@@ -60,6 +60,19 @@ func main() {
 	printTitle(s, idA, "A")
 	printTitle(s, idC, "C")
 
+	if err := s.UpdateIncomingRelations(idA, []store.TitleRelation{{RelatedID: idB, Label: "Снято по книге", ReverseLabel: "Первичный источник"}}); err != nil {
+		fmt.Println("UPD INCOMING ERR:", err)
+		return
+	}
+	printTitle(s, idA, "A AFTER INCOMING EDIT")
+	printTitle(s, idB, "B AFTER INCOMING EDIT")
+
+	if err := s.UpdateIncomingRelations(idA, nil); err != nil {
+		fmt.Println("DEL INCOMING ERR:", err)
+		return
+	}
+	printTitle(s, idB, "B AFTER INCOMING DELETED")
+
 	if err := s.DeleteTitle(idC); err != nil {
 		fmt.Println("DEL C ERR:", err)
 		return
