@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "mimosa-hook-status/v1",
+  "recordedAt": "2026-09-05T18:03:39.051Z",
+  "sessionId": "sess_774a9e7f-c199-468f-85f8-0458d8d845df",
+  "event": "PostToolUse",
+  "toolName": "Write",
+  "file": "C:\\Users\\Sallim\\.zcode\\cli\\memories\\projects\\pergamon-76f5e263d8eeff11\\memory\\MEMORY.md",
+  "outcome": "clear",
+  "coverage": "complete",
+  "findingCount": 0,
+  "durationMs": 8,
+  "hostState": "hook_complete",
+  "reportHint": ".mimosa/reports/"
+}

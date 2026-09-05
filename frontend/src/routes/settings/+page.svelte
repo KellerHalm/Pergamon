@@ -8,7 +8,7 @@
 	import Upload from 'lucide-svelte/icons/upload';
 	import Cloud from 'lucide-svelte/icons/cloud';
 
-	let webdav = $state<WebDAVConfig>({ url: '', username: '', password: '', remoteDir: '/Mediateka' });
+	let webdav = $state<WebDAVConfig>({ url: '', username: '', password: '', remoteDir: '/Pergamon' });
 	let syncResult = $state('');
 	let syncing = $state(false);
 	let syncOnStart = $state(false);
@@ -134,7 +134,7 @@
 			</div>
 			<div class="field">
 				<span class="label">Папка на диске</span>
-				<input class="input" placeholder="/Mediateka" bind:value={webdav.remoteDir} />
+				<input class="input" placeholder="/Pergamon" bind:value={webdav.remoteDir} />
 			</div>
 
 			<div class="actions">

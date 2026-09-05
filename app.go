@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"mediateka/internal/cover"
-	"mediateka/internal/store"
-	"mediateka/internal/sync"
+	"pergamon/internal/cover"
+	"pergamon/internal/store"
+	"pergamon/internal/sync"
 )
 
 type App struct {
@@ -28,19 +28,21 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
-	dataDir, err := userDataDir("Mediateka")
+	dataDir, err := userDataDir("Pergamon")
 	if err != nil {
 		dataDir = "."
 	}
 	a.dataDir = dataDir
 	a.coverDir = filepath.Join(dataDir, "covers")
 
-	s, err := store.Open(filepath.Join(dataDir, "mediateka.db"))
+	migrateLegacyData(dataDir)
+
+	s, err := store.Open(filepath.Join(dataDir, "pergamon.db"))
 	if err != nil {
 		panic(err)
 	}
 	a.store = s
-	a.syncer = sync.NewManager(filepath.Join(dataDir, "mediateka.db"), s)
+	a.syncer = sync.NewManager(filepath.Join(dataDir, "pergamon.db"), s)
 
 	go func() {
 		auto, _ := s.GetSetting("sync_on_startup")
@@ -269,7 +271,7 @@ func (a *App) GetWebDAVConfig() (sync.WebDAVConfig, error) {
 }
 
 func (a *App) ExportJSON() (string, error) {
-	path := filepath.Join(a.dataDir, "mediateka-export-"+time.Now().Format("20060102-150405")+".json")
+	path := filepath.Join(a.dataDir, "pergamon-export-"+time.Now().Format("20060102-150405")+".json")
 	f, err := os.Create(path)
 	if err != nil {
 		return "", err

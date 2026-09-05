@@ -47,7 +47,7 @@ func SaveFromURL(coverDir, rawURL string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "Mediateka/1.0")
+	req.Header.Set("User-Agent", "Pergamon/1.0")
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", err

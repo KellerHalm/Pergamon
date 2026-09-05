@@ -1,4 +1,4 @@
-module mediateka
+module pergamon
 
 go 1.25
 

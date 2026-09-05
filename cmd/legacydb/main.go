@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"mediateka/internal/store"
+	"pergamon/internal/store"
 )
 
 func main() {

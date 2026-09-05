@@ -48,7 +48,7 @@
 	<aside class="sidebar">
 		<div class="logo">
 			<Library size={22} />
-			<span>Медиатека</span>
+			<span>Pergamon</span>
 		</div>
 		<nav>
 			{#each navItems as item}

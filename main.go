@@ -16,7 +16,7 @@ func main() {
 	app := NewApp()
 
 	err := wails.Run(&options.App{
-		Title:     "Локальная Медиатека",
+		Title:     "Pergamon",
 		Width:     1280,
 		Height:    820,
 		MinWidth:  900,

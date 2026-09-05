@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"mediateka/internal/store"
+	"pergamon/internal/store"
 )
 
 func main() {

@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"mediateka/internal/store"
-	"mediateka/internal/sync"
+	"pergamon/internal/store"
+	"pergamon/internal/sync"
 )
 
 func titleName(s *store.Store, id int64) string {

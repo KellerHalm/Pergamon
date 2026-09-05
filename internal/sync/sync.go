@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"mediateka/internal/store"
+	"pergamon/internal/store"
 
 	"github.com/studio-b12/gowebdav"
 )
@@ -84,7 +84,7 @@ func (m *Manager) SyncNow() (SyncResult, error) {
 }
 
 func (m *Manager) loadConfig() (WebDAVConfig, error) {
-	cfg := WebDAVConfig{RemoteDir: "/Mediateka"}
+	cfg := WebDAVConfig{RemoteDir: "/Pergamon"}
 	cfg.URL, _ = m.store.GetSetting("webdav_url")
 	cfg.Username, _ = m.store.GetSetting("webdav_user")
 	cfg.Password, _ = m.store.GetSetting("webdav_pass")
@@ -121,6 +121,8 @@ func client(cfg WebDAVConfig) *gowebdav.Client {
 }
 
 func (m *Manager) remotePath(cfg WebDAVConfig) string {
+	// Имя файла в облаке оставлено прежним: смена имени оторвала бы новые
+	// сборки от базы, уже выгруженной старыми версиями приложения.
 	return cfg.RemoteDir + "/mediateka.db"
 }
 

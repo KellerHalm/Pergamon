@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"mediateka/internal/store"
-	"mediateka/internal/sync"
+	"pergamon/internal/store"
+	"pergamon/internal/sync"
 )
 
 func check(cond bool, msg string) {

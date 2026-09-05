@@ -1,17 +1,17 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "Mediateka",
-  "outputfilename": "Mediateka",
+  "name": "Pergamon",
+  "outputfilename": "Pergamon",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "Mediateka"
+    "name": "Pergamon"
   },
   "info": {
-    "companyName": "Mediateka",
-    "productName": "Локальная Медиатека",
+    "companyName": "Pergamon",
+    "productName": "Pergamon",
     "productVersion": "1.0.0",
     "copyright": "",
     "comments": "Локальная медиатека для учёта контента"

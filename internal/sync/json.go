@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"mediateka/internal/store"
+	"pergamon/internal/store"
 )
 
 type backupFile struct {
