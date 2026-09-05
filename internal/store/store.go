@@ -112,9 +112,17 @@ func (s *Store) migrate() error {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			main_image TEXT DEFAULT '',
 			age TEXT DEFAULT '',
+			gender TEXT NOT NULL DEFAULT '',
+			race TEXT DEFAULT '',
 			description TEXT DEFAULT '',
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS character_fields (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			character_id INTEGER NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			name TEXT NOT NULL,
+			value TEXT DEFAULT ''
 		)`,
 		`CREATE TABLE IF NOT EXISTS character_names (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -168,6 +176,12 @@ func (s *Store) migrate() error {
 		return err
 	}
 	if err := s.addColumnIfMissing("title_relations", "reverse_label", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
+	if err := s.addColumnIfMissing("characters", "gender", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return err
+	}
+	if err := s.addColumnIfMissing("characters", "race", "TEXT NOT NULL DEFAULT ''"); err != nil {
 		return err
 	}
 	if _, err := s.db.Exec(`INSERT INTO title_notes(title_id, heading, content)

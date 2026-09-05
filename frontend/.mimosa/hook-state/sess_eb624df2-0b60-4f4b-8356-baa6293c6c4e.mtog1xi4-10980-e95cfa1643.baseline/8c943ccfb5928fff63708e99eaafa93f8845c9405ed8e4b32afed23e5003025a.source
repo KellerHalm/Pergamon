@@ -42,6 +42,12 @@ export const NAME_KINDS = [
 	{ id: 'alt', label: 'Альтернативное' }
 ];
 
+export const GENDERS = [
+	{ id: '', label: 'Не указано' },
+	{ id: 'male', label: 'Мужской' },
+	{ id: 'female', label: 'Женский' }
+];
+
 export const CREATOR_ROLES = [
 	{ id: 'author', label: 'Автор' },
 	{ id: 'artist', label: 'Художник' },

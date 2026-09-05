@@ -42,6 +42,12 @@ export const NAME_KINDS = [
 	{ id: 'alt', label: 'Альтернативное' }
 ];
 
+export const GENDERS = [
+	{ id: '', label: 'Не указано' },
+	{ id: 'male', label: 'Мужской' },
+	{ id: 'female', label: 'Женский' }
+];
+
 export const CREATOR_ROLES = [
 	{ id: 'author', label: 'Автор' },
 	{ id: 'artist', label: 'Художник' },
@@ -85,6 +91,10 @@ export function releaseStatusColor(id: string): string {
 
 export function typeLabel(id: string): string {
 	return TYPES.find((t) => t.id === id)?.label || id;
+}
+
+export function genderLabel(id: string): string {
+	return GENDERS.find((g) => g.id === id)?.label || '';
 }
 
 export function displayName(names: { kind: string; value: string }[]): string {

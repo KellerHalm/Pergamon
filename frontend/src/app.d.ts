@@ -110,12 +110,20 @@ export interface TitleRef {
 	status: string;
 }
 
+export interface CharacterField {
+	name: string;
+	value: string;
+}
+
 export interface Character {
 	id: number;
 	names: Name[];
 	mainImage: string;
 	age: string;
+	gender: string;
+	race: string;
 	description: string;
+	fields: CharacterField[];
 	images: string[];
 	titles: TitleRef[];
 	titleIds: number[];

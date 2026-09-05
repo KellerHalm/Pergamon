@@ -42,7 +42,10 @@ func main() {
 	c1, err := s.SaveCharacter(store.Character{
 		Names:       []store.Name{{Kind: "russian", Value: "Алиса"}, {Kind: "original", Value: "Alice"}},
 		Age:         "17",
+		Gender:      "female",
+		Race:        "Эльф",
 		Description: "Главная героиня",
+		Fields:      []store.CharacterField{{Name: "Цвет глаз", Value: "зелёный"}},
 		TitleIDs:    []int64{t1, t2},
 	})
 	check(err == nil && c1 > 0, "save character 1")
@@ -56,6 +59,8 @@ func main() {
 	got, err := s.GetCharacter(c1)
 	check(err == nil, "get character")
 	check(got.Age == "17" && got.Description == "Главная героиня", "character fields")
+	check(got.Gender == "female" && got.Race == "Эльф", "gender and race")
+	check(len(got.Fields) == 1 && got.Fields[0].Name == "Цвет глаз" && got.Fields[0].Value == "зелёный", "custom fields")
 	check(len(got.Names) == 2 && got.Names[0].Value == "Алиса", "character names")
 	check(len(got.TitleIDs) == 2 && got.TitleIDs[0] == t1, "character title ids")
 	check(len(got.Titles) == 2 && got.Titles[0].Name == "Аниме Один", "character title refs")
@@ -88,6 +93,7 @@ func main() {
 	check(err == nil && upd == c1, "update character")
 	got, _ = s.GetCharacter(c1)
 	check(got.Age == "18" && len(got.Names) == 1 && got.Names[0].Value == "Алиса Updated", "update fields")
+	check(got.Gender == "" && got.Race == "" && len(got.Fields) == 0, "gender/race/fields cleared on update")
 
 	img := filepath.Join(dir, "img1.png")
 	_ = os.WriteFile(img, []byte("fake"), 0644)
@@ -96,10 +102,14 @@ func main() {
 		Names:     []store.Name{{Kind: "russian", Value: "Алиса Updated"}},
 		MainImage: "img1.png",
 		Images:    []string{"img1.png"},
-		TitleIDs:  []int64{t1},
+		Gender:    "female",
+		Race:      "Эльф",
+		Fields:    []store.CharacterField{{Name: "Цвет глаз", Value: "зелёный"}, {Name: "  ", Value: "ignored"}},
 	})
 	got, _ = s.GetCharacter(c1)
 	check(got.MainImage == "img1.png" && len(got.Images) == 1, "images saved")
+	check(got.Gender == "female" && got.Race == "Эльф", "gender/race re-saved")
+	check(len(got.Fields) == 1 && got.Fields[0].Name == "Цвет глаз", "blank-name field skipped")
 
 	m := sync.NewManager(filepath.Join(dir, "test.db"), s)
 	var buf bytes.Buffer

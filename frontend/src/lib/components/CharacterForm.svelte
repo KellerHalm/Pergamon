@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { charactersApi, coverApi, titlesApi } from '$lib/api';
-	import { NAME_KINDS, displayName } from '$lib/constants';
+	import { NAME_KINDS, GENDERS, displayName } from '$lib/constants';
 	import type { Character, Title } from '../../app.d';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Minus from 'lucide-svelte/icons/minus';
@@ -20,7 +20,10 @@
 	let mainUploading = $state(false);
 	let mainUrlInput = $state('');
 	let age = $state('');
+	let gender = $state('');
+	let race = $state('');
 	let description = $state('');
+	let fields = $state<{ name: string; value: string }[]>([]);
 	let images = $state<string[]>([]);
 	let imageUrls = $state<Record<string, string>>({});
 	let imagesUploading = $state(false);
@@ -36,7 +39,10 @@
 			mainImage = character.mainImage || '';
 			if (mainImage) mainImageUrl = await coverApi.dataURL(mainImage);
 			age = character.age || '';
+			gender = character.gender || '';
+			race = character.race || '';
 			description = character.description || '';
+			fields = (character.fields || []).map((f) => ({ ...f }));
 			images = [...(character.images || [])];
 			titleIds = [...(character.titleIds || [])];
 			for (const f of images) {
@@ -109,6 +115,10 @@
 		names.push({ kind: 'original', value: '' });
 	}
 
+	function addField() {
+		fields.push({ name: '', value: '' });
+	}
+
 	function titleCandidates(): Title[] {
 		return allTitles.filter((t) => !titleIds.includes(t.id));
 	}
@@ -133,7 +143,10 @@
 				names: names.filter((n) => n.value.trim()),
 				mainImage,
 				age: age.trim(),
+				gender,
+				race: race.trim(),
 				description,
+				fields: fields.filter((f) => f.name.trim()),
 				images: [...images],
 				titles: [],
 				titleIds: [...titleIds],
@@ -196,6 +209,19 @@
 		<button class="btn sm" onclick={addName}><Plus size={14} /> Добавить имя</button>
 	</div>
 
+	<div class="form-row">
+		<div class="field">
+			<span class="label">Пол</span>
+			<select class="select" bind:value={gender}>
+				{#each GENDERS as g}<option value={g.id}>{g.label}</option>{/each}
+			</select>
+		</div>
+		<div class="field">
+			<span class="label">Раса</span>
+			<input class="input" placeholder="Например: эльф…" bind:value={race} />
+		</div>
+	</div>
+
 	<div class="field">
 		<span class="label">Возраст</span>
 		<input class="input" placeholder="Например: 17 лет…" bind:value={age} />
@@ -204,6 +230,18 @@
 	<div class="field">
 		<span class="label">Описание</span>
 		<textarea class="textarea" rows={4} bind:value={description} placeholder="Биография, характер…"></textarea>
+	</div>
+
+	<div class="field">
+		<span class="label">Свои поля</span>
+		{#each fields as f, i}
+			<div class="row-3">
+				<input class="input" placeholder="Название поля…" bind:value={f.name} />
+				<input class="input" placeholder="Значение…" bind:value={f.value} />
+				<button class="btn btn-icon sm" onclick={() => fields.splice(i, 1)}><Minus size={14} /></button>
+			</div>
+		{/each}
+		<button class="btn sm" onclick={addField}><Plus size={14} /> Добавить поле</button>
 	</div>
 
 	<div class="field">
@@ -295,8 +333,19 @@
 		gap: 6px;
 		margin-bottom: 6px;
 	}
-	.row-2 .input {
+	.row-3 {
+		display: flex;
+		gap: 6px;
+		margin-bottom: 6px;
+	}
+	.row-2 .input,
+	.row-3 .input {
 		flex: 1;
+	}
+	.form-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 14px;
 	}
 	.sm {
 		width: auto;
@@ -387,6 +436,9 @@
 		.cover-area {
 			flex-direction: column;
 			align-items: center;
+		}
+		.form-row {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>

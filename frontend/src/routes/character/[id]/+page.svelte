@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { tick } from 'svelte';
 	import { charactersApi, coverApi } from '$lib/api';
-	import { displayName } from '$lib/constants';
+	import { displayName, genderLabel } from '$lib/constants';
 	import type { Character } from '../../../app.d';
 	import ArrowLeft from 'lucide-svelte/icons/arrow-left';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
@@ -137,6 +137,12 @@
 				{#if character.age}
 					<div class="age">Возраст: {character.age}</div>
 				{/if}
+				{#if character.gender}
+					<div class="age">Пол: {genderLabel(character.gender)}</div>
+				{/if}
+				{#if character.race}
+					<div class="age">Раса: {character.race}</div>
+				{/if}
 				{#if character.titles.length > 0}
 					<div class="in-titles">{inTitlesLabel(character.titles.length)}</div>
 				{/if}
@@ -147,6 +153,19 @@
 			<section class="section">
 				<h3>Описание</h3>
 				<p class="synopsis">{character.description}</p>
+			</section>
+		{/if}
+
+		{#if character.fields.length > 0}
+			<section class="section">
+				<div class="fields-list">
+					{#each character.fields as f (f.name)}
+						<div class="field-row">
+							<span class="field-name">{f.name}</span>
+							<span class="field-value">{f.value}</span>
+						</div>
+					{/each}
+				</div>
 			</section>
 		{/if}
 
@@ -288,6 +307,31 @@
 		color: var(--text-dim);
 		line-height: 1.6;
 		font-size: 14px;
+	}
+
+	.fields-list {
+		background: var(--bg-elev);
+		border-radius: var(--radius);
+		padding: 6px 16px;
+	}
+	.field-row {
+		display: flex;
+		gap: 12px;
+		padding: 8px 0;
+		border-bottom: 1px solid var(--border);
+		font-size: 14px;
+	}
+	.field-row:last-child {
+		border-bottom: none;
+	}
+	.field-name {
+		width: 220px;
+		flex-shrink: 0;
+		color: var(--text-dim);
+	}
+	.field-value {
+		color: var(--text);
+		word-break: break-word;
 	}
 
 	.cards {

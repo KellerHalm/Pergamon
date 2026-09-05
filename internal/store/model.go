@@ -38,17 +38,25 @@ type TitleRef struct {
 	Status string `json:"status"`
 }
 
+type CharacterField struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type Character struct {
-	ID          int64        `json:"id"`
-	Names       []Name       `json:"names"`
-	MainImage   string       `json:"mainImage"`
-	Age         string       `json:"age"`
-	Description string       `json:"description"`
-	Images      []string     `json:"images"`
-	Titles      []TitleRef   `json:"titles"`
-	TitleIDs    []int64      `json:"titleIds"`
-	CreatedAt   string       `json:"createdAt"`
-	UpdatedAt   string       `json:"updatedAt"`
+	ID          int64            `json:"id"`
+	Names       []Name           `json:"names"`
+	MainImage   string           `json:"mainImage"`
+	Age         string           `json:"age"`
+	Gender      string           `json:"gender"`
+	Race        string           `json:"race"`
+	Description string           `json:"description"`
+	Fields      []CharacterField `json:"fields"`
+	Images      []string         `json:"images"`
+	Titles      []TitleRef       `json:"titles"`
+	TitleIDs    []int64          `json:"titleIds"`
+	CreatedAt   string           `json:"createdAt"`
+	UpdatedAt   string           `json:"updatedAt"`
 }
 
 type Progress struct {
@@ -500,10 +508,10 @@ func (s *Store) ListCharacters(sort string) ([]Character, error) {
 }
 
 func (s *Store) GetCharacter(id int64) (*Character, error) {
-	c := &Character{Names: []Name{}, Images: []string{}, Titles: []TitleRef{}, TitleIDs: []int64{}}
-	err := s.db.QueryRow(`SELECT id,COALESCE(main_image,''),COALESCE(age,''),COALESCE(description,''),
+	c := &Character{Names: []Name{}, Fields: []CharacterField{}, Images: []string{}, Titles: []TitleRef{}, TitleIDs: []int64{}}
+	err := s.db.QueryRow(`SELECT id,COALESCE(main_image,''),COALESCE(age,''),COALESCE(gender,''),COALESCE(race,''),COALESCE(description,''),
 			created_at,updated_at FROM characters WHERE id=?`, id).Scan(
-		&c.ID, &c.MainImage, &c.Age, &c.Description, &c.CreatedAt, &c.UpdatedAt)
+		&c.ID, &c.MainImage, &c.Age, &c.Gender, &c.Race, &c.Description, &c.CreatedAt, &c.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -521,6 +529,20 @@ func (s *Store) GetCharacter(id int64) (*Character, error) {
 		c.Names = append(c.Names, n)
 	}
 	nRows.Close()
+
+	fRows, err := s.db.Query(`SELECT name,value FROM character_fields WHERE character_id=? ORDER BY id`, id)
+	if err != nil {
+		return nil, err
+	}
+	for fRows.Next() {
+		var f CharacterField
+		if err := fRows.Scan(&f.Name, &f.Value); err != nil {
+			fRows.Close()
+			return nil, err
+		}
+		c.Fields = append(c.Fields, f)
+	}
+	fRows.Close()
 
 	iRows, err := s.db.Query(`SELECT file FROM character_images WHERE character_id=? ORDER BY position, id`, id)
 	if err != nil {
@@ -567,8 +589,8 @@ func (s *Store) SaveCharacter(c Character) (int64, error) {
 	defer tx.Rollback()
 
 	if c.ID == 0 {
-		res, err := tx.Exec(`INSERT INTO characters(main_image,age,description,created_at,updated_at)
-			VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`, c.MainImage, c.Age, c.Description)
+		res, err := tx.Exec(`INSERT INTO characters(main_image,age,gender,race,description,created_at,updated_at)
+			VALUES(?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`, c.MainImage, c.Age, c.Gender, c.Race, c.Description)
 		if err != nil {
 			return 0, err
 		}
@@ -577,8 +599,8 @@ func (s *Store) SaveCharacter(c Character) (int64, error) {
 			return 0, err
 		}
 	} else {
-		_, err := tx.Exec(`UPDATE characters SET main_image=?,age=?,description=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`,
-			c.MainImage, c.Age, c.Description, c.ID)
+		_, err := tx.Exec(`UPDATE characters SET main_image=?,age=?,gender=?,race=?,description=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`,
+			c.MainImage, c.Age, c.Gender, c.Race, c.Description, c.ID)
 		if err != nil {
 			return 0, err
 		}
@@ -592,6 +614,17 @@ func (s *Store) SaveCharacter(c Character) (int64, error) {
 			continue
 		}
 		if _, err := tx.Exec(`INSERT INTO character_names(character_id,kind,value) VALUES(?,?,?)`, c.ID, n.Kind, n.Value); err != nil {
+			return 0, err
+		}
+	}
+	if _, err := tx.Exec(`DELETE FROM character_fields WHERE character_id=?`, c.ID); err != nil {
+		return 0, err
+	}
+	for _, f := range c.Fields {
+		if strings.TrimSpace(f.Name) == "" {
+			continue
+		}
+		if _, err := tx.Exec(`INSERT INTO character_fields(character_id,name,value) VALUES(?,?,?)`, c.ID, strings.TrimSpace(f.Name), f.Value); err != nil {
 			return 0, err
 		}
 	}
