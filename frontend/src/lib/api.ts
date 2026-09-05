@@ -1,4 +1,4 @@
-import type { Character, ListQuery, Note, Person, Relation, Shelf, Studio, SyncResult, Title, WebDAVConfig } from '../app.d';
+import type { Character, ListQuery, Note, Person, Relation, Shelf, Studio, SyncResult, Title, WebDAVConfig, ImportResult } from '../app.d';
 
 const api = () => window.go.main.App;
 
@@ -75,7 +75,7 @@ export const syncApi = {
 	saveConfig: (c: WebDAVConfig) => api().SaveWebDAVConfig(c),
 	getConfig: () => api().GetWebDAVConfig() as Promise<WebDAVConfig>,
 	exportJSON: () => api().ExportJSON(),
-	importJSON: (data: string) => api().ImportJSONData(data),
+	importJSON: (data: string) => api().ImportJSONData(data) as Promise<ImportResult>,
 	exportSQLite: (p: string) => api().ExportSQLitePath(p),
 	importSQLite: (p: string) => api().ImportSQLitePath(p)
 };

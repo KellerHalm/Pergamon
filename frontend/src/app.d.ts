@@ -41,7 +41,7 @@ declare global {
 					SaveWebDAVConfig(cfg: WebDAVConfig): Promise<void>;
 					GetWebDAVConfig(): Promise<WebDAVConfig>;
 					ExportJSON(): Promise<string>;
-					ImportJSONData(data: string): Promise<void>;
+					ImportJSONData(data: string): Promise<ImportResult>;
 					ExportSQLitePath(dest: string): Promise<void>;
 					ImportSQLitePath(src: string): Promise<void>;
 				};
@@ -215,6 +215,11 @@ export interface SyncResult {
 	uploaded: number;
 	message: string;
 	time: string;
+}
+
+export interface ImportResult {
+	added: number;
+	updated: number;
 }
 
 export interface WebDAVConfig {

@@ -23,9 +23,9 @@ func NewManager(dbPath string, s *store.Store) *Manager {
 }
 
 type WebDAVConfig struct {
-	URL      string `json:"url"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	URL       string `json:"url"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
 	RemoteDir string `json:"remoteDir"`
 }
 
@@ -173,7 +173,7 @@ func (m *Manager) ExportJSON(w io.Writer) error {
 	return exportJSON(m.store, w)
 }
 
-func (m *Manager) ImportJSON(r io.Reader) error {
+func (m *Manager) ImportJSON(r io.Reader) (ImportResult, error) {
 	return importJSON(m.store, r)
 }
 

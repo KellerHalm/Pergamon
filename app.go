@@ -253,6 +253,7 @@ func (a *App) CoverColor(filename string) string {
 }
 
 type SyncResult = sync.SyncResult
+type ImportResult = sync.ImportResult
 
 func (a *App) SyncNow() (SyncResult, error) {
 	return a.syncer.SyncNow()
@@ -283,7 +284,7 @@ func (a *App) ExportJSON() (string, error) {
 	return path, nil
 }
 
-func (a *App) ImportJSONData(data string) error {
+func (a *App) ImportJSONData(data string) (ImportResult, error) {
 	return a.syncer.ImportJSON(strings.NewReader(data))
 }
 

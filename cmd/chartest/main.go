@@ -119,7 +119,8 @@ func main() {
 	check(err == nil, "open second db")
 	defer s2.Close()
 	m2 := sync.NewManager(filepath.Join(dir, "import.db"), s2)
-	check(m2.ImportJSON(&buf) == nil, "import json")
+	_, err = m2.ImportJSON(&buf)
+	check(err == nil, "import json")
 
 	chars, _ := s2.ListCharacters("")
 	titles, _ := s2.ListTitles(store.ListFilter{})

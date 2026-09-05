@@ -3,6 +3,8 @@ package sync
 import (
 	"encoding/json"
 	"io"
+	"strconv"
+	"strings"
 
 	"pergamon/internal/store"
 )
@@ -57,12 +59,68 @@ func exportJSON(s *store.Store, w io.Writer) error {
 	return enc.Encode(b)
 }
 
-func importJSON(s *store.Store, r io.Reader) error {
+type ImportResult struct {
+	Added   int `json:"added"`
+	Updated int `json:"updated"`
+}
+
+// Импорт работает как слияние: записи, уже существующие в базе (определяются
+// по имени), обновляются данными из бэкапа вместо дублирования.
+func importJSON(s *store.Store, r io.Reader) (ImportResult, error) {
+	var res ImportResult
 	var b backupFile
 	dec := json.NewDecoder(r)
 	if err := dec.Decode(&b); err != nil {
-		return err
+		return res, err
 	}
+
+	titleIdx, err := buildTitleIndex(s)
+	if err != nil {
+		return res, err
+	}
+	charIdx := map[string]int64{}
+	chars, err := s.ListCharacters("")
+	if err != nil {
+		return res, err
+	}
+	for _, c := range chars {
+		indexNames(charIdx, c.ID, c.Names)
+	}
+	studioIdx := map[string]int64{}
+	studios, err := s.ListStudios("")
+	if err != nil {
+		return res, err
+	}
+	for _, st := range studios {
+		indexNames(studioIdx, st.ID, st.Names)
+	}
+	peopleIdx := map[string]int64{}
+	people, err := s.ListPeople("")
+	if err != nil {
+		return res, err
+	}
+	for _, p := range people {
+		indexNames(peopleIdx, p.ID, p.Names)
+	}
+	shelfIdx := map[string]int64{}
+	existingShelves, err := s.ListShelves()
+	if err != nil {
+		return res, err
+	}
+	for _, sh := range existingShelves {
+		if k := normName(sh.Name); k != "" {
+			shelfIdx[k] = sh.ID
+		}
+	}
+	existingNotes, err := s.ListAllNotes()
+	if err != nil {
+		return res, err
+	}
+	noteSet := map[string]bool{}
+	for _, n := range existingNotes {
+		noteSet[noteKey(n.TitleID, n.Heading, n.Content)] = true
+	}
+
 	type pendingRelations struct {
 		newID int64
 		rels  []store.TitleRelation
@@ -72,12 +130,17 @@ func importJSON(s *store.Store, r io.Reader) error {
 	for _, t := range b.Titles {
 		oldID := t.ID
 		rels := t.Relations
-		t.ID = 0
+		t.ID = matchTitle(titleIdx, t)
+		if t.ID != 0 {
+			res.Updated++
+		} else {
+			res.Added++
+		}
 		t.Relations = nil
 		t.Characters = nil
 		newID, err := s.SaveTitle(t)
 		if err != nil {
-			return err
+			return res, err
 		}
 		if oldID != 0 {
 			idMap[oldID] = newID
@@ -95,7 +158,7 @@ func importJSON(s *store.Store, r io.Reader) error {
 		}
 		if len(remapped) > 0 {
 			if err := s.ReplaceTitleRelations(p.newID, remapped); err != nil {
-				return err
+				return res, err
 			}
 		}
 	}
@@ -106,11 +169,16 @@ func importJSON(s *store.Store, r io.Reader) error {
 	var pendingChars []pendingCharacter
 	for _, c := range b.Characters {
 		titleIDs := c.TitleIDs
-		c.ID = 0
+		c.ID = matchByName(charIdx, c.Names)
+		if c.ID != 0 {
+			res.Updated++
+		} else {
+			res.Added++
+		}
 		c.TitleIDs = nil
 		newID, err := s.SaveCharacter(c)
 		if err != nil {
-			return err
+			return res, err
 		}
 		pendingChars = append(pendingChars, pendingCharacter{newID: newID, titleIDs: titleIDs})
 	}
@@ -118,7 +186,7 @@ func importJSON(s *store.Store, r io.Reader) error {
 		remapped := remapIDs(pc.titleIDs, idMap)
 		if len(remapped) > 0 {
 			if err := s.SetCharacterTitles(pc.newID, remapped); err != nil {
-				return err
+				return res, err
 			}
 		}
 	}
@@ -129,11 +197,16 @@ func importJSON(s *store.Store, r io.Reader) error {
 	var pendingStudios []pendingEntity
 	for _, st := range b.Studios {
 		titleIDs := st.TitleIDs
-		st.ID = 0
+		st.ID = matchByName(studioIdx, st.Names)
+		if st.ID != 0 {
+			res.Updated++
+		} else {
+			res.Added++
+		}
 		st.TitleIDs = nil
 		newID, err := s.SaveStudio(st)
 		if err != nil {
-			return err
+			return res, err
 		}
 		pendingStudios = append(pendingStudios, pendingEntity{newID: newID, titleIDs: titleIDs})
 	}
@@ -141,18 +214,23 @@ func importJSON(s *store.Store, r io.Reader) error {
 		remapped := remapIDs(ps.titleIDs, idMap)
 		if len(remapped) > 0 {
 			if err := s.SetStudioTitles(ps.newID, remapped); err != nil {
-				return err
+				return res, err
 			}
 		}
 	}
 	var pendingPeople []pendingEntity
 	for _, p := range b.People {
 		titleIDs := p.TitleIDs
-		p.ID = 0
+		p.ID = matchByName(peopleIdx, p.Names)
+		if p.ID != 0 {
+			res.Updated++
+		} else {
+			res.Added++
+		}
 		p.TitleIDs = nil
 		newID, err := s.SavePerson(p)
 		if err != nil {
-			return err
+			return res, err
 		}
 		pendingPeople = append(pendingPeople, pendingEntity{newID: newID, titleIDs: titleIDs})
 	}
@@ -160,19 +238,24 @@ func importJSON(s *store.Store, r io.Reader) error {
 		remapped := remapIDs(pp.titleIDs, idMap)
 		if len(remapped) > 0 {
 			if err := s.SetPersonTitles(pp.newID, remapped); err != nil {
-				return err
+				return res, err
 			}
 		}
 	}
 	for _, sh := range b.Shelves {
-		sh.ID = 0
+		sh.ID = shelfIdx[normName(sh.Name)]
+		if sh.ID != 0 {
+			res.Updated++
+		} else {
+			res.Added++
+		}
 		sh.TitleIDs = remapIDs(sh.TitleIDs, idMap)
 		id, err := s.SaveShelf(sh)
 		if err != nil {
-			return err
+			return res, err
 		}
 		if err := s.SetShelfItems(id, sh.TitleIDs); err != nil {
-			return err
+			return res, err
 		}
 	}
 	for _, n := range b.Notes {
@@ -180,13 +263,71 @@ func importJSON(s *store.Store, r io.Reader) error {
 		if !ok {
 			continue
 		}
+		if noteSet[noteKey(newTitleID, n.Heading, n.Content)] {
+			continue
+		}
 		n.ID = 0
 		n.TitleID = newTitleID
+		res.Added++
 		if _, err := s.SaveNote(n); err != nil {
-			return err
+			return res, err
 		}
 	}
-	return nil
+	return res, nil
+}
+
+func normName(s string) string {
+	return strings.ToLower(strings.TrimSpace(s))
+}
+
+func indexNames(idx map[string]int64, id int64, names []store.Name) {
+	for _, n := range names {
+		if k := normName(n.Value); k != "" {
+			idx[k] = id
+		}
+	}
+}
+
+func matchByName(idx map[string]int64, names []store.Name) int64 {
+	for _, n := range names {
+		if id, ok := idx[normName(n.Value)]; ok {
+			return id
+		}
+	}
+	return 0
+}
+
+// Ключ книги — любое из её имён в паре с категорией: одна и та же книга
+// в разных категориях (например роман и его экранизация) не склеиваются.
+func buildTitleIndex(s *store.Store) (map[string]int64, error) {
+	titles, err := s.ListTitles(store.ListFilter{})
+	if err != nil {
+		return nil, err
+	}
+	idx := make(map[string]int64)
+	for _, t := range titles {
+		for _, n := range t.Names {
+			if k := normName(n.Value); k != "" {
+				idx[t.Category+"\x00"+k] = t.ID
+			}
+		}
+	}
+	return idx, nil
+}
+
+func matchTitle(idx map[string]int64, t store.Title) int64 {
+	for _, n := range t.Names {
+		if k := normName(n.Value); k != "" {
+			if id, ok := idx[t.Category+"\x00"+k]; ok {
+				return id
+			}
+		}
+	}
+	return 0
+}
+
+func noteKey(titleID int64, heading, content string) string {
+	return strconv.FormatInt(titleID, 10) + "\x00" + heading + "\x00" + content
 }
 
 func remapIDs(ids []int64, idMap map[int64]int64) []int64 {

@@ -105,8 +105,8 @@
 			try {
 				const text = await file.text();
 				const json = JSON.parse(text);
-				await syncApi.importJSON(JSON.stringify(json, null, 2));
-				syncResult = 'Импорт завершён';
+				const res = await syncApi.importJSON(JSON.stringify(json, null, 2));
+				syncResult = `Импорт завершён: добавлено ${res.added}, обновлено ${res.updated}`;
 			} catch (e: any) {
 				syncResult = 'Ошибка: ' + errText(e);
 			}

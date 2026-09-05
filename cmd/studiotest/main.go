@@ -188,7 +188,7 @@ func main() {
 	}
 	defer s2.Close()
 	m2 := sync.NewManager(filepath.Join(tmp, "dst.db"), s2)
-	if err := m2.ImportJSON(bytes.NewReader(buf.Bytes())); err != nil {
+	if _, err := m2.ImportJSON(bytes.NewReader(buf.Bytes())); err != nil {
 		fmt.Println("IMPORT ERR:", err)
 		return
 	}
