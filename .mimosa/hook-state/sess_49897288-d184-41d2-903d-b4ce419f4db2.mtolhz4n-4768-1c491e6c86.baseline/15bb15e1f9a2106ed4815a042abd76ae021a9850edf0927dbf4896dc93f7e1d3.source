@@ -1,1 +1,0 @@
-import{a as o,f as e}from"../chunks/BwWQI0Re.js";import"../chunks/D7qjkSpV.js";import{C as t,z as i,B as m}from"../chunks/CjuUICSG.js";import{C as n}from"../chunks/C1DtUhgs.js";var p=e('<div class="page svelte-1nunvss"><h1 class="svelte-1nunvss">Добавить персонажа</h1> <!></div>');function f(a){var s=p(),r=t(i(s),2);n(r,{}),m(s),o(a,s)}export{f as component};
