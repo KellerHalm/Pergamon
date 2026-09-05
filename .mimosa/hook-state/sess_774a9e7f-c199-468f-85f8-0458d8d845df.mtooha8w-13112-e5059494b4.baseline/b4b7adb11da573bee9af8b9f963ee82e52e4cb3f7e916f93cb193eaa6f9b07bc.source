@@ -1,0 +1,97 @@
+import { f as attr, j as stringify, e as escape_html, d as ensure_array_like } from "../../../chunks/index.js";
+import { d as displayName } from "../../../chunks/constants.js";
+import { c as charactersApi } from "../../../chunks/api.js";
+import { P as Plus } from "../../../chunks/plus.js";
+function CharacterCard($$renderer, $$props) {
+  $$renderer.component(($$renderer2) => {
+    let { character } = $$props;
+    $$renderer2.push(`<a${attr("href", `/character/${stringify(character.id)}`)} class="card svelte-19e1lap"><div class="poster svelte-19e1lap">`);
+    {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--></div> <div class="info svelte-19e1lap"><div class="name svelte-19e1lap">${escape_html(displayName(character.names))}</div> `);
+    if (character.age) {
+      $$renderer2.push("<!--[0-->");
+      $$renderer2.push(`<div class="age svelte-19e1lap">${escape_html(character.age)}</div>`);
+    } else {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--></div></a>`);
+  });
+}
+function _page($$renderer, $$props) {
+  $$renderer.component(($$renderer2) => {
+    let characters = [];
+    let loading = true;
+    let sort = "created";
+    async function load() {
+      loading = true;
+      try {
+        characters = await charactersApi.list(sort) || [];
+      } catch (e) {
+        console.error(e);
+        characters = [];
+      }
+      loading = false;
+    }
+    function setSort(v) {
+      sort = v;
+      load();
+    }
+    const sortOptions = [
+      { id: "created", label: "По добавлению" },
+      { id: "updated", label: "По обновлению" },
+      { id: "name", label: "По алфавиту" }
+    ];
+    function countLabel(n) {
+      const m10 = n % 10;
+      const m100 = n % 100;
+      if (m10 === 1 && m100 !== 11) return `${n} персонаж`;
+      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return `${n} персонажа`;
+      return `${n} персонажей`;
+    }
+    $$renderer2.push(`<div class="page svelte-75i7xh"><div class="topbar svelte-75i7xh"><h1 class="svelte-75i7xh">Персонажи</h1> <div class="count svelte-75i7xh">${escape_html(countLabel(characters.length))}</div></div> <div class="toolbar svelte-75i7xh">`);
+    $$renderer2.select(
+      {
+        class: "select sort",
+        value: sort,
+        onchange: (e) => setSort(e.currentTarget.value)
+      },
+      ($$renderer3) => {
+        $$renderer3.push(`<!--[-->`);
+        const each_array = ensure_array_like(sortOptions);
+        for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
+          let o = each_array[$$index];
+          $$renderer3.option({ value: o.id }, ($$renderer4) => {
+            $$renderer4.push(`${escape_html(o.label)}`);
+          });
+        }
+        $$renderer3.push(`<!--]-->`);
+      },
+      "svelte-75i7xh"
+    );
+    $$renderer2.push(` <a href="/character/add" class="btn btn-primary">`);
+    Plus($$renderer2, { size: 16 });
+    $$renderer2.push(`<!----> Добавить персонажа</a></div> `);
+    if (loading) {
+      $$renderer2.push("<!--[0-->");
+      $$renderer2.push(`<div class="empty svelte-75i7xh">Загрузка…</div>`);
+    } else if (characters.length === 0) {
+      $$renderer2.push("<!--[1-->");
+      $$renderer2.push(`<div class="empty svelte-75i7xh"><div class="empty-icon svelte-75i7xh">🧑‍🎤</div> <h2 class="svelte-75i7xh">Персонажей пока нет</h2> <p class="svelte-75i7xh">Создайте первого персонажа и привяжите его к тайтлам.</p> <a href="/character/add" class="btn btn-primary">Добавить персонажа</a></div>`);
+    } else {
+      $$renderer2.push("<!--[-1-->");
+      $$renderer2.push(`<div class="grid svelte-75i7xh"><!--[-->`);
+      const each_array_1 = ensure_array_like(characters);
+      for (let $$index_1 = 0, $$length = each_array_1.length; $$index_1 < $$length; $$index_1++) {
+        let c = each_array_1[$$index_1];
+        CharacterCard($$renderer2, { character: c });
+      }
+      $$renderer2.push(`<!--]--></div>`);
+    }
+    $$renderer2.push(`<!--]--></div>`);
+  });
+}
+export {
+  _page as default
+};
