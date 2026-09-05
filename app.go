@@ -156,6 +156,38 @@ func (a *App) DeleteCharacter(id int64) error {
 	return a.store.DeleteCharacter(id)
 }
 
+func (a *App) ListStudios(sort string) ([]store.Studio, error) {
+	return a.store.ListStudios(sort)
+}
+
+func (a *App) GetStudio(id int64) (*store.Studio, error) {
+	return a.store.GetStudio(id)
+}
+
+func (a *App) SaveStudio(s store.Studio) (int64, error) {
+	return a.store.SaveStudio(s)
+}
+
+func (a *App) DeleteStudio(id int64) error {
+	return a.store.DeleteStudio(id)
+}
+
+func (a *App) ListPeople(sort string) ([]store.Person, error) {
+	return a.store.ListPeople(sort)
+}
+
+func (a *App) GetPerson(id int64) (*store.Person, error) {
+	return a.store.GetPerson(id)
+}
+
+func (a *App) SavePerson(p store.Person) (int64, error) {
+	return a.store.SavePerson(p)
+}
+
+func (a *App) DeletePerson(id int64) error {
+	return a.store.DeletePerson(id)
+}
+
 func (a *App) GetSetting(key string) string {
 	v, _ := a.store.GetSetting(key)
 	return v

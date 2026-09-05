@@ -4,6 +4,8 @@
 	import Library from 'lucide-svelte/icons/library';
 	import BookOpen from 'lucide-svelte/icons/book-open';
 	import Users from 'lucide-svelte/icons/users';
+	import Building2 from 'lucide-svelte/icons/building-2';
+	import PenTool from 'lucide-svelte/icons/pen-tool';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Settings from 'lucide-svelte/icons/settings';
 	import { onMount } from 'svelte';
@@ -21,6 +23,8 @@
 		{ href: '/', label: 'Каталог', icon: BookOpen },
 		{ href: '/shelf', label: 'Полка', icon: Library },
 		{ href: '/characters', label: 'Персонажи', icon: Users },
+		{ href: '/studios', label: 'Студии', icon: Building2 },
+		{ href: '/people', label: 'Деятели', icon: PenTool },
 		{ href: '/add', label: 'Добавить', icon: Plus },
 		{ href: '/settings', label: 'Настройки', icon: Settings }
 	];
@@ -28,6 +32,8 @@
 	function isActive(href: string, path: string): boolean {
 		if (href === '/') return path === '/' || path.startsWith('/title');
 		if (href === '/characters') return path === '/characters' || path.startsWith('/character/');
+		if (href === '/studios') return path === '/studios' || path.startsWith('/studio/');
+		if (href === '/people') return path === '/people' || path.startsWith('/person/');
 		return path.startsWith(href);
 	}
 

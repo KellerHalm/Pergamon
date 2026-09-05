@@ -2,7 +2,7 @@
 import { page } from '$app/stores';
 import { goto } from '$app/navigation';
 import { tick } from 'svelte';
-	import { titlesApi, coverApi, shelvesApi, charactersApi } from '$lib/api';
+	import { titlesApi, coverApi, shelvesApi, charactersApi, studiosApi, peopleApi } from '$lib/api';
 	import {
 		STATUSES,
 		RELEASE_STATUSES,
@@ -10,7 +10,7 @@ import { tick } from 'svelte';
 		WATCH_CATEGORIES,
 		TYPES,
 		NAME_KINDS,
-		CREATOR_ROLES,
+		PEOPLE_ROLES,
 		READ_PROGRESS,
 		WATCH_PROGRESS,
 		statusLabel,
@@ -20,9 +20,10 @@ import { tick } from 'svelte';
 		categoryLabel,
 		typeLabel,
 		progressForType,
+		roleLabel,
 		displayName
 	} from '$lib/constants';
-	import type { Title, Shelf, Character } from '../../../app.d';
+	import type { Title, Shelf, Character, Studio, Person } from '../../../app.d';
 	import ArrowLeft from 'lucide-svelte/icons/arrow-left';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import Plus from 'lucide-svelte/icons/plus';
@@ -51,7 +52,11 @@ import { tick } from 'svelte';
 	let relCovers = $state<Record<number, string>>({});
 	let allTitles = $state<Title[]>([]);
 	let allCharacters = $state<Character[]>([]);
+	let allStudios = $state<Studio[]>([]);
+	let allPeople = $state<Person[]>([]);
 	let charImgUrls = $state<Record<number, string>>({});
+	let editStudioRows = $state<{ name: string }[]>([]);
+	let editPersonRows = $state<{ role: string; name: string }[]>([]);
 	let loadedId = 0;
 
 	const id = $derived(Number($page.params.id));
@@ -63,6 +68,21 @@ import { tick } from 'svelte';
 		return [...own, ...incoming];
 	});
 	const SCORES = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+
+	function creatorEntries(): { label: string; href?: string }[] {
+		if (!title) return [];
+		const out: { label: string; href?: string }[] = [];
+		for (const p of title.people || []) {
+			out.push({ label: `${p.name} (${roleLabel(p.role)})`, href: `/person/${p.id}` });
+		}
+		for (const s of title.studios || []) {
+			out.push({ label: `${s.name} (${roleLabel('studio')})`, href: `/studio/${s.id}` });
+		}
+		for (const c of title.creators || []) {
+			out.push({ label: `${c.name} (${roleLabel(c.role)})` });
+		}
+		return out;
+	}
 
 	$effect(() => {
 		if (!editTitle) return;
@@ -179,7 +199,11 @@ import { tick } from 'svelte';
 		shelves = (await shelvesApi.list()) || [];
 		allTitles = (await titlesApi.list()) || [];
 		allCharacters = (await charactersApi.list('name')) || [];
+		allStudios = (await studiosApi.list('name')) || [];
+		allPeople = (await peopleApi.list('name')) || [];
 		editTitle.characters = (editTitle.characters || []).map((c: any) => ({ id: c.id }));
+		editStudioRows = (title?.studios || []).map((s) => ({ name: s.name }));
+		editPersonRows = (title?.people || []).map((p) => ({ role: p.role, name: p.name }));
 		editShelfId = shelves.find((s) => s.titleIds.includes(id))?.id ?? 0;
 		editShelfInitial = editShelfId;
 		editing = true;
@@ -187,6 +211,12 @@ import { tick } from 'svelte';
 
 	async function saveEdit() {
 		if (!editTitle) return;
+		editTitle.studios = editStudioRows
+			.map((s) => ({ id: 0, name: s.name.trim() }))
+			.filter((s) => s.name);
+		editTitle.people = editPersonRows
+			.map((p) => ({ id: 0, role: p.role, name: p.name.trim() }))
+			.filter((p) => p.name);
 		await titlesApi.save(editTitle);
 		await titlesApi.updateIncomingRelations(
 			id,
@@ -223,11 +253,17 @@ import { tick } from 'svelte';
 	function removeName(i: number) {
 		editTitle.names.splice(i, 1);
 	}
-	function addCreator() {
-		editTitle.creators.push({ role: 'author', name: '' });
+	function addStudioRow() {
+		editStudioRows.push({ name: '' });
 	}
-	function removeCreator(i: number) {
-		editTitle.creators.splice(i, 1);
+	function removeStudioRow(i: number) {
+		editStudioRows.splice(i, 1);
+	}
+	function addPersonRow() {
+		editPersonRows.push({ role: 'author', name: '' });
+	}
+	function removePersonRow(i: number) {
+		editPersonRows.splice(i, 1);
 	}
 	function addGenre() {
 		editTitle.genres.push('');
@@ -418,17 +454,42 @@ import { tick } from 'svelte';
 				</div>
 
 				<div class="field">
-					<span class="label">Создатели</span>
-					{#each e.creators as c, i}
-						<div class="row-3">
-							<select class="select sm" bind:value={c.role}>
-								{#each CREATOR_ROLES as r}<option value={r.id}>{r.label}</option>{/each}
-							</select>
-							<input class="input" placeholder="Имя…" bind:value={c.name} />
-							<button class="btn btn-icon sm" onclick={() => removeCreator(i)}><Minus size={14} /></button>
+					<span class="label">Студии</span>
+					{#each editStudioRows as s, i}
+						<div class="row-2">
+							<input class="input" list="studio-options" placeholder="Название студии…" bind:value={s.name} />
+							<button class="btn btn-icon sm" onclick={() => removeStudioRow(i)}><Minus size={14} /></button>
 						</div>
 					{/each}
-					<button class="btn sm" onclick={addCreator}><Plus size={14} /> Создатель</button>
+					<button class="btn sm" onclick={addStudioRow}><Plus size={14} /> Добавить студию</button>
+					<span class="rel-hint">Выберите студию из списка или введите новое название — она создастся автоматически.</span>
+					<datalist id="studio-options">
+						{#each allStudios as st (st.id)}
+							<option value={displayName(st.names)}></option>
+						{/each}
+					</datalist>
+				</div>
+
+				<div class="field">
+					<span class="label">Деятели</span>
+					{#each editPersonRows as p, i}
+						<div class="row-3">
+							<select class="select sm" bind:value={p.role}>
+								{#each PEOPLE_ROLES as r}<option value={r.id}>{r.label}</option>{/each}
+							</select>
+							<input class="input" list={'person-options-' + p.role} placeholder="Имя…" bind:value={p.name} />
+							<button class="btn btn-icon sm" onclick={() => removePersonRow(i)}><Minus size={14} /></button>
+						</div>
+					{/each}
+					<button class="btn sm" onclick={addPersonRow}><Plus size={14} /> Добавить деятеля</button>
+					<span class="rel-hint">Выберите деятеля из списка или введите новое имя — он создастся автоматически.</span>
+					{#each PEOPLE_ROLES as r (r.id)}
+						<datalist id={'person-options-' + r.id}>
+							{#each allPeople.filter((p) => p.role === r.id) as pr (pr.id)}
+								<option value={displayName(pr.names)}></option>
+							{/each}
+						</datalist>
+					{/each}
 				</div>
 
 				<div class="field">
@@ -591,9 +652,9 @@ import { tick } from 'svelte';
 				<div class="header-info">
 					<div class="type-badge">{typeLabel(title.type)} · {categoryLabel(title.category)}</div>
 					<h1 class="detail-title">{title.names.map((n: any) => n.value).join(' / ')}</h1>
-					{#if title.creators.length > 0}
+					{#if creatorEntries().length > 0}
 						<div class="creators">
-							{title.creators.map((c: any) => `${c.name} (${c.role})`).join(', ')}
+							{#each creatorEntries() as entry, i}{#if i > 0}{", "}{/if}{#if entry.href}<a class="creator-link" href={entry.href}>{entry.label}</a>{:else}{entry.label}{/if}{/each}
 						</div>
 					{/if}
 					<div class="badges">
@@ -903,6 +964,13 @@ import { tick } from 'svelte';
 		font-size: 13px;
 		color: var(--text-dim);
 		margin-bottom: 10px;
+	}
+	.creator-link {
+		color: var(--accent);
+		text-decoration: none;
+	}
+	.creator-link:hover {
+		text-decoration: underline;
 	}
 	.badges {
 		display: flex;

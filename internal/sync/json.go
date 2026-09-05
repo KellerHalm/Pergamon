@@ -8,12 +8,14 @@ import (
 )
 
 type backupFile struct {
-	Version    int                `json:"version"`
-	Exported   string             `json:"exported"`
-	Titles     []store.Title      `json:"titles"`
-	Shelves    []store.Shelf      `json:"shelves"`
-	Notes      []store.Note       `json:"notes,omitempty"`
-	Characters []store.Character  `json:"characters,omitempty"`
+	Version    int               `json:"version"`
+	Exported   string            `json:"exported"`
+	Titles     []store.Title     `json:"titles"`
+	Shelves    []store.Shelf     `json:"shelves"`
+	Notes      []store.Note      `json:"notes,omitempty"`
+	Characters []store.Character `json:"characters,omitempty"`
+	Studios    []store.Studio    `json:"studios,omitempty"`
+	People     []store.Person    `json:"people,omitempty"`
 }
 
 func exportJSON(s *store.Store, w io.Writer) error {
@@ -33,12 +35,22 @@ func exportJSON(s *store.Store, w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	studios, err := s.ListStudios("")
+	if err != nil {
+		return err
+	}
+	people, err := s.ListPeople("")
+	if err != nil {
+		return err
+	}
 	b := backupFile{
 		Version:    2,
 		Titles:     titles,
 		Shelves:    shelves,
 		Notes:      notes,
 		Characters: characters,
+		Studios:    studios,
+		People:     people,
 	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
@@ -111,6 +123,58 @@ func importJSON(s *store.Store, r io.Reader) error {
 		}
 		if len(remapped) > 0 {
 			if err := s.SetCharacterTitles(pc.newID, remapped); err != nil {
+				return err
+			}
+		}
+	}
+	type pendingEntity struct {
+		newID    int64
+		titleIDs []int64
+	}
+	var pendingStudios []pendingEntity
+	for _, st := range b.Studios {
+		titleIDs := st.TitleIDs
+		st.ID = 0
+		st.TitleIDs = nil
+		newID, err := s.SaveStudio(st)
+		if err != nil {
+			return err
+		}
+		pendingStudios = append(pendingStudios, pendingEntity{newID: newID, titleIDs: titleIDs})
+	}
+	for _, ps := range pendingStudios {
+		remapped := make([]int64, 0, len(ps.titleIDs))
+		for _, tid := range ps.titleIDs {
+			if id, ok := idMap[tid]; ok {
+				remapped = append(remapped, id)
+			}
+		}
+		if len(remapped) > 0 {
+			if err := s.SetStudioTitles(ps.newID, remapped); err != nil {
+				return err
+			}
+		}
+	}
+	var pendingPeople []pendingEntity
+	for _, p := range b.People {
+		titleIDs := p.TitleIDs
+		p.ID = 0
+		p.TitleIDs = nil
+		newID, err := s.SavePerson(p)
+		if err != nil {
+			return err
+		}
+		pendingPeople = append(pendingPeople, pendingEntity{newID: newID, titleIDs: titleIDs})
+	}
+	for _, pp := range pendingPeople {
+		remapped := make([]int64, 0, len(pp.titleIDs))
+		for _, tid := range pp.titleIDs {
+			if id, ok := idMap[tid]; ok {
+				remapped = append(remapped, id)
+			}
+		}
+		if len(remapped) > 0 {
+			if err := s.SetPersonTitles(pp.newID, remapped); err != nil {
 				return err
 			}
 		}

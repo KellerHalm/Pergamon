@@ -2,6 +2,7 @@ package store
 
 import (
 	"database/sql"
+	"strings"
 
 	_ "modernc.org/sqlite"
 )
@@ -142,6 +143,68 @@ func (s *Store) migrate() error {
 			position INTEGER NOT NULL DEFAULT 0,
 			PRIMARY KEY (title_id, character_id)
 		)`,
+		`CREATE TABLE IF NOT EXISTS studios (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			main_image TEXT DEFAULT '',
+			founded TEXT DEFAULT '',
+			description TEXT DEFAULT '',
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS studio_names (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			studio_id INTEGER NOT NULL REFERENCES studios(id) ON DELETE CASCADE,
+			kind TEXT NOT NULL,
+			value TEXT NOT NULL
+		)`,
+		`CREATE TABLE IF NOT EXISTS studio_founders (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			studio_id INTEGER NOT NULL REFERENCES studios(id) ON DELETE CASCADE,
+			name TEXT NOT NULL,
+			position INTEGER NOT NULL DEFAULT 0
+		)`,
+		`CREATE TABLE IF NOT EXISTS studio_images (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			studio_id INTEGER NOT NULL REFERENCES studios(id) ON DELETE CASCADE,
+			file TEXT NOT NULL,
+			position INTEGER NOT NULL DEFAULT 0
+		)`,
+		`CREATE TABLE IF NOT EXISTS title_studios (
+			title_id INTEGER NOT NULL REFERENCES titles(id) ON DELETE CASCADE,
+			studio_id INTEGER NOT NULL REFERENCES studios(id) ON DELETE CASCADE,
+			position INTEGER NOT NULL DEFAULT 0,
+			PRIMARY KEY (title_id, studio_id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS people (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			main_image TEXT DEFAULT '',
+			age TEXT DEFAULT '',
+			birth_date TEXT DEFAULT '',
+			death_date TEXT DEFAULT '',
+			gender TEXT NOT NULL DEFAULT '',
+			role TEXT NOT NULL DEFAULT 'author',
+			description TEXT DEFAULT '',
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS person_names (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			person_id INTEGER NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+			kind TEXT NOT NULL,
+			value TEXT NOT NULL
+		)`,
+		`CREATE TABLE IF NOT EXISTS person_images (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			person_id INTEGER NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+			file TEXT NOT NULL,
+			position INTEGER NOT NULL DEFAULT 0
+		)`,
+		`CREATE TABLE IF NOT EXISTS title_people (
+			title_id INTEGER NOT NULL REFERENCES titles(id) ON DELETE CASCADE,
+			person_id INTEGER NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+			position INTEGER NOT NULL DEFAULT 0,
+			PRIMARY KEY (title_id, person_id)
+		)`,
 		`CREATE TABLE IF NOT EXISTS settings (
 			key TEXT PRIMARY KEY,
 			value TEXT NOT NULL DEFAULT ''
@@ -160,6 +223,14 @@ func (s *Store) migrate() error {
 		`CREATE INDEX IF NOT EXISTS idx_character_images_character ON character_images(character_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_title_characters_title ON title_characters(title_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_title_characters_character ON title_characters(character_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_studio_names_value ON studio_names(value)`,
+		`CREATE INDEX IF NOT EXISTS idx_studio_images_studio ON studio_images(studio_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_title_studios_title ON title_studios(title_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_title_studios_studio ON title_studios(studio_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_person_names_value ON person_names(value)`,
+		`CREATE INDEX IF NOT EXISTS idx_person_images_person ON person_images(person_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_title_people_title ON title_people(title_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_title_people_person ON title_people(person_id)`,
 	}
 	for _, st := range stmts {
 		if _, err := s.db.Exec(st); err != nil {
@@ -191,7 +262,148 @@ func (s *Store) migrate() error {
 	if _, err := s.db.Exec(`UPDATE titles SET notes='' WHERE TRIM(notes) != ''`); err != nil {
 		return err
 	}
+	if err := s.migrateCreatorsToEntities(); err != nil {
+		return err
+	}
 	return nil
+}
+
+func (s *Store) migrateCreatorsToEntities() error {
+	rows, err := s.db.Query(`SELECT title_id, role, name FROM title_creators ORDER BY id`)
+	if err != nil {
+		return err
+	}
+	type creatorRow struct {
+		titleID int64
+		role    string
+		name    string
+	}
+	var rowsData []creatorRow
+	for rows.Next() {
+		var r creatorRow
+		if err := rows.Scan(&r.titleID, &r.role, &r.name); err != nil {
+			rows.Close()
+			return err
+		}
+		rowsData = append(rowsData, r)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	if len(rowsData) == 0 {
+		return nil
+	}
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, r := range rowsData {
+		name := strings.TrimSpace(r.name)
+		if name == "" {
+			continue
+		}
+		if r.role == "studio" {
+			id, err := findOrCreateStudioTx(tx, name)
+			if err != nil {
+				return err
+			}
+			if _, err := tx.Exec(`INSERT OR IGNORE INTO title_studios(title_id,studio_id,position) VALUES(?,?,0)`, r.titleID, id); err != nil {
+				return err
+			}
+		} else {
+			id, err := findOrCreatePersonTx(tx, name, r.role)
+			if err != nil {
+				return err
+			}
+			if _, err := tx.Exec(`INSERT OR IGNORE INTO title_people(title_id,person_id,position) VALUES(?,?,0)`, r.titleID, id); err != nil {
+				return err
+			}
+		}
+	}
+	if _, err := tx.Exec(`DELETE FROM title_creators`); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func findOrCreateStudioTx(tx *sql.Tx, name string) (int64, error) {
+	rows, err := tx.Query(`SELECT studio_id, value FROM studio_names`)
+	if err != nil {
+		return 0, err
+	}
+	var found int64
+	for rows.Next() {
+		var id int64
+		var v string
+		if err := rows.Scan(&id, &v); err != nil {
+			rows.Close()
+			return 0, err
+		}
+		if strings.EqualFold(strings.TrimSpace(v), name) {
+			found = id
+			break
+		}
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return 0, err
+	}
+	if found != 0 {
+		return found, nil
+	}
+	res, err := tx.Exec(`INSERT INTO studios(main_image,founded,description) VALUES('','','')`)
+	if err != nil {
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if _, err := tx.Exec(`INSERT INTO studio_names(studio_id,kind,value) VALUES(?,?,?)`, id, "original", name); err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func findOrCreatePersonTx(tx *sql.Tx, name, role string) (int64, error) {
+	rows, err := tx.Query(`SELECT p.id, p.role, pn.value FROM people p JOIN person_names pn ON pn.person_id=p.id`)
+	if err != nil {
+		return 0, err
+	}
+	var found int64
+	for rows.Next() {
+		var id int64
+		var pRole, v string
+		if err := rows.Scan(&id, &pRole, &v); err != nil {
+			rows.Close()
+			return 0, err
+		}
+		if pRole == role && strings.EqualFold(strings.TrimSpace(v), name) {
+			found = id
+			break
+		}
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return 0, err
+	}
+	if found != 0 {
+		return found, nil
+	}
+	res, err := tx.Exec(`INSERT INTO people(role) VALUES(?)`, role)
+	if err != nil {
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if _, err := tx.Exec(`INSERT INTO person_names(person_id,kind,value) VALUES(?,?,?)`, id, "original", name); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (s *Store) addColumnIfMissing(table, column, decl string) error {

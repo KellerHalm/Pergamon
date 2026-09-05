@@ -55,6 +55,8 @@ export const CREATOR_ROLES = [
 	{ id: 'studio', label: 'Студия' }
 ];
 
+export const PEOPLE_ROLES = CREATOR_ROLES.filter((r) => r.id !== 'studio');
+
 export const READ_PROGRESS = [
 	{ id: 'volumes', label: 'Тома' },
 	{ id: 'chapters', label: 'Главы' },
@@ -95,6 +97,10 @@ export function typeLabel(id: string): string {
 
 export function genderLabel(id: string): string {
 	return GENDERS.find((g) => g.id === id)?.label || '';
+}
+
+export function roleLabel(id: string): string {
+	return CREATOR_ROLES.find((r) => r.id === id)?.label || id;
 }
 
 export function displayName(names: { kind: string; value: string }[]): string {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { titlesApi, coverApi, shelvesApi, charactersApi } from '$lib/api';
+	import { titlesApi, coverApi, shelvesApi, charactersApi, studiosApi, peopleApi } from '$lib/api';
 	import {
 		TYPES,
 		ALL_CATEGORIES,
@@ -10,13 +10,13 @@
 		STATUSES,
 		RELEASE_STATUSES,
 		NAME_KINDS,
-		CREATOR_ROLES,
+		PEOPLE_ROLES,
 		READ_PROGRESS,
 		WATCH_PROGRESS,
 		progressForType,
 		displayName
 	} from '$lib/constants';
-	import type { Title, Shelf, Character } from '../../app.d';
+	import type { Title, Shelf, Character, Studio, Person } from '../../app.d';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Minus from 'lucide-svelte/icons/minus';
 	import ImagePlus from 'lucide-svelte/icons/image-plus';
@@ -34,7 +34,8 @@
 	let imageUrls = $state<Record<string, string>>({});
 	let imagesUploading = $state(false);
 	let synopsis = $state('');
-	let creators = $state<{ role: string; name: string }[]>([]);
+	let studioRows = $state<{ name: string }[]>([]);
+	let personRows = $state<{ role: string; name: string }[]>([]);
 	let genres = $state<string[]>([]);
 	let tags = $state<string[]>([]);
 	let score = $state(0);
@@ -52,6 +53,8 @@
 	let allTitles = $state<Title[]>([]);
 	let charRefs = $state<{ id: number }[]>([]);
 	let allCharacters = $state<Character[]>([]);
+	let allStudios = $state<Studio[]>([]);
+	let allPeople = $state<Person[]>([]);
 
 	const typeShelves = $derived(shelves.filter((s) => s.kind === type));
 
@@ -59,6 +62,8 @@
 		shelves = (await shelvesApi.list()) || [];
 		allTitles = (await titlesApi.list()) || [];
 		allCharacters = (await charactersApi.list('name')) || [];
+		allStudios = (await studiosApi.list('name')) || [];
+		allPeople = (await peopleApi.list('name')) || [];
 	});
 
 	$effect(() => {
@@ -150,7 +155,13 @@
 				cover,
 				images: [...images],
 				synopsis,
-				creators: creators.filter((c) => c.name.trim()),
+				creators: [],
+				studios: studioRows
+					.map((s) => ({ id: 0, name: s.name.trim() }))
+					.filter((s) => s.name),
+				people: personRows
+					.map((p) => ({ id: 0, role: p.role, name: p.name.trim() }))
+					.filter((p) => p.name),
 				genres: genres.filter((g) => g.trim()),
 				tags: tags.filter((t) => t.trim()),
 				relations: relations.filter((r) => r.relatedId > 0),
@@ -187,7 +198,8 @@
 	}
 
 	function addName() { names.push({ kind: 'original', value: '' }); }
-	function addCreator() { creators.push({ role: 'author', name: '' }); }
+	function addStudioRow() { studioRows.push({ name: '' }); }
+	function addPersonRow() { personRows.push({ role: 'author', name: '' }); }
 	function addGenre() { genres.push(''); }
 	function addTag() { tags.push(''); }
 	function addRelation() { relations.push({ relatedId: 0, label: '', reverseLabel: '' }); }
@@ -306,17 +318,42 @@
 		</div>
 
 		<div class="field">
-			<span class="label">Создатели</span>
-			{#each creators as c, i}
-				<div class="row-3">
-					<select class="select sm" bind:value={c.role}>
-						{#each CREATOR_ROLES as r}<option value={r.id}>{r.label}</option>{/each}
-					</select>
-					<input class="input" placeholder="Имя…" bind:value={c.name} />
-					<button class="btn btn-icon sm" onclick={() => creators.splice(i, 1)}><Minus size={14} /></button>
+			<span class="label">Студии</span>
+			{#each studioRows as s, i}
+				<div class="row-2">
+					<input class="input" list="studio-options" placeholder="Название студии…" bind:value={s.name} />
+					<button class="btn btn-icon sm" onclick={() => studioRows.splice(i, 1)}><Minus size={14} /></button>
 				</div>
 			{/each}
-			<button class="btn sm" onclick={addCreator}><Plus size={14} /> Добавить создателя</button>
+			<button class="btn sm" onclick={addStudioRow}><Plus size={14} /> Добавить студию</button>
+			<span class="rel-hint">Выберите студию из списка или введите новое название — она создастся автоматически.</span>
+			<datalist id="studio-options">
+				{#each allStudios as st (st.id)}
+					<option value={displayName(st.names)}></option>
+				{/each}
+			</datalist>
+		</div>
+
+		<div class="field">
+			<span class="label">Деятели</span>
+			{#each personRows as p, i}
+				<div class="row-3">
+					<select class="select sm" bind:value={p.role}>
+						{#each PEOPLE_ROLES as r}<option value={r.id}>{r.label}</option>{/each}
+					</select>
+					<input class="input" list={'person-options-' + p.role} placeholder="Имя…" bind:value={p.name} />
+					<button class="btn btn-icon sm" onclick={() => personRows.splice(i, 1)}><Minus size={14} /></button>
+				</div>
+			{/each}
+			<button class="btn sm" onclick={addPersonRow}><Plus size={14} /> Добавить деятеля</button>
+			<span class="rel-hint">Выберите деятеля из списка или введите новое имя — он создастся автоматически.</span>
+			{#each PEOPLE_ROLES as r (r.id)}
+				<datalist id={'person-options-' + r.id}>
+					{#each allPeople.filter((p) => p.role === r.id) as pr (pr.id)}
+						<option value={displayName(pr.names)}></option>
+					{/each}
+				</datalist>
+			{/each}
 		</div>
 
 		<div class="form-row">

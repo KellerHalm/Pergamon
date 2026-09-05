@@ -22,6 +22,14 @@ declare global {
 					GetCharacter(id: number): Promise<Character>;
 					SaveCharacter(c: Character): Promise<number>;
 					DeleteCharacter(id: number): Promise<void>;
+					ListStudios(sort: string): Promise<Studio[]>;
+					GetStudio(id: number): Promise<Studio>;
+					SaveStudio(s: Studio): Promise<number>;
+					DeleteStudio(id: number): Promise<void>;
+					ListPeople(sort: string): Promise<Person[]>;
+					GetPerson(id: number): Promise<Person>;
+					SavePerson(p: Person): Promise<number>;
+					DeletePerson(id: number): Promise<void>;
 					GetSetting(key: string): Promise<string>;
 					SetSetting(key: string, value: string): Promise<void>;
 					UploadCoverDataURL(dataUrl: string): Promise<string>;
@@ -86,6 +94,8 @@ export interface Title {
 	relations: Relation[];
 	reverseRelations?: Relation[];
 	characters: CharacterRef[];
+	studios: StudioRef[];
+	people: PersonRef[];
 	score: number;
 	status: string;
 	releaseStatus: string;
@@ -124,6 +134,48 @@ export interface Character {
 	race: string;
 	description: string;
 	fields: CharacterField[];
+	images: string[];
+	titles: TitleRef[];
+	titleIds: number[];
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface StudioRef {
+	id: number;
+	name: string;
+}
+
+export interface PersonRef {
+	id: number;
+	role: string;
+	name: string;
+}
+
+export interface Studio {
+	id: number;
+	names: Name[];
+	mainImage: string;
+	founded: string;
+	founders: string[];
+	description: string;
+	images: string[];
+	titles: TitleRef[];
+	titleIds: number[];
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface Person {
+	id: number;
+	names: Name[];
+	mainImage: string;
+	age: string;
+	birthDate: string;
+	deathDate: string;
+	gender: string;
+	role: string;
+	description: string;
 	images: string[];
 	titles: TitleRef[];
 	titleIds: number[];
