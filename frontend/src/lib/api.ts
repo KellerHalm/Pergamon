@@ -2,6 +2,13 @@ import type { Character, ListQuery, Note, Person, Relation, Shelf, Studio, SyncR
 
 const api = () => window.go.main.App;
 
+// Wails возвращает ошибки Go как строки, а не как Error-объекты,
+// поэтому e.message у них отсутствует.
+export function errText(e: unknown): string {
+	if (e instanceof Error) return e.message;
+	return String(e);
+}
+
 export const titlesApi = {
 	list: (q: ListQuery = {}) => api().ListTitles(q),
 	get: (id: number) => api().GetTitle(id),
@@ -68,7 +75,7 @@ export const syncApi = {
 	saveConfig: (c: WebDAVConfig) => api().SaveWebDAVConfig(c),
 	getConfig: () => api().GetWebDAVConfig() as Promise<WebDAVConfig>,
 	exportJSON: () => api().ExportJSON(),
-	importJSON: (p: string) => api().ImportJSONPath(p),
+	importJSON: (data: string) => api().ImportJSONData(data),
 	exportSQLite: (p: string) => api().ExportSQLitePath(p),
 	importSQLite: (p: string) => api().ImportSQLitePath(p)
 };

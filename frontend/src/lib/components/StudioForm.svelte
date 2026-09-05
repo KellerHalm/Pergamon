@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { studiosApi, coverApi, titlesApi } from '$lib/api';
+	import { studiosApi, coverApi, titlesApi, errText } from '$lib/api';
 	import { NAME_KINDS, displayName } from '$lib/constants';
 	import type { Studio, Title } from '../../app.d';
 	import Plus from 'lucide-svelte/icons/plus';
@@ -150,7 +150,7 @@
 			const id = await studiosApi.save(st);
 			goto('/studio/' + id);
 		} catch (e: any) {
-			error = e.message || 'Ошибка сохранения';
+			error = errText(e) || 'Ошибка сохранения';
 		}
 		saving = false;
 	}

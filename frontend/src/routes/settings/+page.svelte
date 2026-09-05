@@ -29,6 +29,11 @@
 		loaded = true;
 	});
 
+	function errText(e: unknown): string {
+		if (e instanceof Error) return e.message;
+		return String(e);
+	}
+
 	async function saveWebDAV() {
 		await syncApi.saveConfig(webdav);
 		syncResult = 'Настройки сохранены';
@@ -41,7 +46,7 @@
 			await syncApi.test(webdav);
 			syncResult = '✓ Подключение успешно';
 		} catch (e: any) {
-			syncResult = '✗ Ошибка: ' + e.message;
+			syncResult = '✗ Ошибка: ' + errText(e);
 		}
 	}
 
@@ -52,7 +57,7 @@
 			const res = await syncApi.now();
 			syncResult = res.message;
 		} catch (e: any) {
-			syncResult = 'Ошибка: ' + e.message;
+			syncResult = 'Ошибка: ' + errText(e);
 		}
 		syncing = false;
 	}
@@ -86,7 +91,7 @@
 			const path = await syncApi.exportJSON();
 			syncResult = 'Экспорт: ' + path;
 		} catch (e: any) {
-			syncResult = 'Ошибка: ' + e.message;
+			syncResult = 'Ошибка: ' + errText(e);
 		}
 	}
 
@@ -103,7 +108,7 @@
 				await syncApi.importJSON(JSON.stringify(json, null, 2));
 				syncResult = 'Импорт завершён';
 			} catch (e: any) {
-				syncResult = 'Ошибка: ' + e.message;
+				syncResult = 'Ошибка: ' + errText(e);
 			}
 		};
 		input.click();

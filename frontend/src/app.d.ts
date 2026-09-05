@@ -41,7 +41,7 @@ declare global {
 					SaveWebDAVConfig(cfg: WebDAVConfig): Promise<void>;
 					GetWebDAVConfig(): Promise<WebDAVConfig>;
 					ExportJSON(): Promise<string>;
-					ImportJSONPath(path: string): Promise<void>;
+					ImportJSONData(data: string): Promise<void>;
 					ExportSQLitePath(dest: string): Promise<void>;
 					ImportSQLitePath(src: string): Promise<void>;
 				};

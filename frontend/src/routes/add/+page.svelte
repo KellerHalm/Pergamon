@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { titlesApi, coverApi, shelvesApi, charactersApi, studiosApi, peopleApi } from '$lib/api';
+	import { titlesApi, coverApi, shelvesApi, charactersApi, studiosApi, peopleApi, errText } from '$lib/api';
 	import {
 		TYPES,
 		ALL_CATEGORIES,
@@ -194,7 +194,7 @@
 			}
 			goto('/title/' + id);
 		} catch (e: any) {
-			error = e.message || 'Ошибка сохранения';
+			error = errText(e) || 'Ошибка сохранения';
 		}
 		saving = false;
 	}

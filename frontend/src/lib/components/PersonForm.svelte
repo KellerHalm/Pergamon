@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { peopleApi, coverApi, titlesApi } from '$lib/api';
+	import { peopleApi, coverApi, titlesApi, errText } from '$lib/api';
 	import { NAME_KINDS, GENDERS, PEOPLE_ROLES, displayName } from '$lib/constants';
 	import type { Person, Title } from '../../app.d';
 	import Plus from 'lucide-svelte/icons/plus';
@@ -155,7 +155,7 @@
 			const id = await peopleApi.save(p);
 			goto('/person/' + id);
 		} catch (e: any) {
-			error = e.message || 'Ошибка сохранения';
+			error = errText(e) || 'Ошибка сохранения';
 		}
 		saving = false;
 	}

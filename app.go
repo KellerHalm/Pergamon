@@ -283,13 +283,8 @@ func (a *App) ExportJSON() (string, error) {
 	return path, nil
 }
 
-func (a *App) ImportJSONPath(path string) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return a.syncer.ImportJSON(f)
+func (a *App) ImportJSONData(data string) error {
+	return a.syncer.ImportJSON(strings.NewReader(data))
 }
 
 func (a *App) ExportSQLitePath(dest string) error {

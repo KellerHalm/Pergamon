@@ -115,12 +115,7 @@ func importJSON(s *store.Store, r io.Reader) error {
 		pendingChars = append(pendingChars, pendingCharacter{newID: newID, titleIDs: titleIDs})
 	}
 	for _, pc := range pendingChars {
-		remapped := make([]int64, 0, len(pc.titleIDs))
-		for _, tid := range pc.titleIDs {
-			if id, ok := idMap[tid]; ok {
-				remapped = append(remapped, id)
-			}
-		}
+		remapped := remapIDs(pc.titleIDs, idMap)
 		if len(remapped) > 0 {
 			if err := s.SetCharacterTitles(pc.newID, remapped); err != nil {
 				return err
@@ -143,12 +138,7 @@ func importJSON(s *store.Store, r io.Reader) error {
 		pendingStudios = append(pendingStudios, pendingEntity{newID: newID, titleIDs: titleIDs})
 	}
 	for _, ps := range pendingStudios {
-		remapped := make([]int64, 0, len(ps.titleIDs))
-		for _, tid := range ps.titleIDs {
-			if id, ok := idMap[tid]; ok {
-				remapped = append(remapped, id)
-			}
-		}
+		remapped := remapIDs(ps.titleIDs, idMap)
 		if len(remapped) > 0 {
 			if err := s.SetStudioTitles(ps.newID, remapped); err != nil {
 				return err
@@ -167,12 +157,7 @@ func importJSON(s *store.Store, r io.Reader) error {
 		pendingPeople = append(pendingPeople, pendingEntity{newID: newID, titleIDs: titleIDs})
 	}
 	for _, pp := range pendingPeople {
-		remapped := make([]int64, 0, len(pp.titleIDs))
-		for _, tid := range pp.titleIDs {
-			if id, ok := idMap[tid]; ok {
-				remapped = append(remapped, id)
-			}
-		}
+		remapped := remapIDs(pp.titleIDs, idMap)
 		if len(remapped) > 0 {
 			if err := s.SetPersonTitles(pp.newID, remapped); err != nil {
 				return err
@@ -180,6 +165,8 @@ func importJSON(s *store.Store, r io.Reader) error {
 		}
 	}
 	for _, sh := range b.Shelves {
+		sh.ID = 0
+		sh.TitleIDs = remapIDs(sh.TitleIDs, idMap)
 		id, err := s.SaveShelf(sh)
 		if err != nil {
 			return err
@@ -189,13 +176,25 @@ func importJSON(s *store.Store, r io.Reader) error {
 		}
 	}
 	for _, n := range b.Notes {
-		n.ID = 0
-		if newID, ok := idMap[n.TitleID]; ok {
-			n.TitleID = newID
+		newTitleID, ok := idMap[n.TitleID]
+		if !ok {
+			continue
 		}
+		n.ID = 0
+		n.TitleID = newTitleID
 		if _, err := s.SaveNote(n); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func remapIDs(ids []int64, idMap map[int64]int64) []int64 {
+	remapped := make([]int64, 0, len(ids))
+	for _, id := range ids {
+		if newID, ok := idMap[id]; ok {
+			remapped = append(remapped, newID)
+		}
+	}
+	return remapped
 }
