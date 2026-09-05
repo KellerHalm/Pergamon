@@ -1,0 +1,6 @@
+
+
+export const index = 8;
+export const imports = ["_app/immutable/nodes/8.C3GL2an2.js","_app/immutable/chunks/BwWQI0Re.js","_app/immutable/chunks/CjuUICSG.js","_app/immutable/chunks/Beu7m20r.js","_app/immutable/chunks/CduIwSth.js","_app/immutable/chunks/D7qjkSpV.js","_app/immutable/chunks/VDLK3I7_.js","_app/immutable/chunks/BR8tJZd-.js","_app/immutable/chunks/DjsHzgJx.js","_app/immutable/chunks/BuPThwD-.js"];
+export const stylesheets = ["_app/immutable/assets/PosterCard.DYPkBV3V.css","_app/immutable/assets/8.D_I0n0rQ.css"];
+export const fonts = [];

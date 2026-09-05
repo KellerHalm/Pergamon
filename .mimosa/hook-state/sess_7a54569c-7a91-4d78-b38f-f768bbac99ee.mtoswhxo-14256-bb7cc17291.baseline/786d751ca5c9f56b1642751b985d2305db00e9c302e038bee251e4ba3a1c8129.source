@@ -1,0 +1,21 @@
+import { f as attr, e as escape_html } from "./index.js";
+function PosterCard($$renderer, $$props) {
+  $$renderer.component(($$renderer2) => {
+    let { href, image = "", title, subtitle = "" } = $$props;
+    $$renderer2.push(`<a${attr("href", href)} class="card svelte-i38hfd"><div class="poster svelte-i38hfd">`);
+    {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--></div> <div class="info svelte-i38hfd"><div class="name svelte-i38hfd">${escape_html(title)}</div> `);
+    if (subtitle) {
+      $$renderer2.push("<!--[0-->");
+      $$renderer2.push(`<div class="subtitle svelte-i38hfd">${escape_html(subtitle)}</div>`);
+    } else {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--></div></a>`);
+  });
+}
+export {
+  PosterCard as P
+};

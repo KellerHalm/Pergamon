@@ -1,0 +1,86 @@
+import { e as escape_html, d as ensure_array_like } from "../../../chunks/index.js";
+import { P as PosterCard } from "../../../chunks/PosterCard.js";
+import { s as studiosApi } from "../../../chunks/api.js";
+import { d as displayName } from "../../../chunks/constants.js";
+import { P as Plus } from "../../../chunks/plus.js";
+function _page($$renderer, $$props) {
+  $$renderer.component(($$renderer2) => {
+    let studios = [];
+    let loading = true;
+    let sort = "created";
+    async function load() {
+      loading = true;
+      try {
+        studios = await studiosApi.list(sort) || [];
+      } catch (e) {
+        console.error(e);
+        studios = [];
+      }
+      loading = false;
+    }
+    function setSort(v) {
+      sort = v;
+      load();
+    }
+    const sortOptions = [
+      { id: "created", label: "По добавлению" },
+      { id: "updated", label: "По обновлению" },
+      { id: "name", label: "По алфавиту" }
+    ];
+    function countLabel(n) {
+      const m10 = n % 10;
+      const m100 = n % 100;
+      if (m10 === 1 && m100 !== 11) return `${n} студия`;
+      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return `${n} студии`;
+      return `${n} студий`;
+    }
+    $$renderer2.push(`<div class="page svelte-1r6rcuo"><div class="topbar svelte-1r6rcuo"><h1 class="svelte-1r6rcuo">Студии</h1> <div class="count svelte-1r6rcuo">${escape_html(countLabel(studios.length))}</div></div> <div class="toolbar svelte-1r6rcuo">`);
+    $$renderer2.select(
+      {
+        class: "select sort",
+        value: sort,
+        onchange: (e) => setSort(e.currentTarget.value)
+      },
+      ($$renderer3) => {
+        $$renderer3.push(`<!--[-->`);
+        const each_array = ensure_array_like(sortOptions);
+        for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
+          let o = each_array[$$index];
+          $$renderer3.option({ value: o.id }, ($$renderer4) => {
+            $$renderer4.push(`${escape_html(o.label)}`);
+          });
+        }
+        $$renderer3.push(`<!--]-->`);
+      },
+      "svelte-1r6rcuo"
+    );
+    $$renderer2.push(` <a href="/studio/add" class="btn btn-primary">`);
+    Plus($$renderer2, { size: 16 });
+    $$renderer2.push(`<!----> Добавить студию</a></div> `);
+    if (loading) {
+      $$renderer2.push("<!--[0-->");
+      $$renderer2.push(`<div class="empty svelte-1r6rcuo">Загрузка…</div>`);
+    } else if (studios.length === 0) {
+      $$renderer2.push("<!--[1-->");
+      $$renderer2.push(`<div class="empty svelte-1r6rcuo"><div class="empty-icon svelte-1r6rcuo">🏢</div> <h2 class="svelte-1r6rcuo">Студий пока нет</h2> <p class="svelte-1r6rcuo">Создайте первую студию и привяжите её к тайтлам.</p> <a href="/studio/add" class="btn btn-primary">Добавить студию</a></div>`);
+    } else {
+      $$renderer2.push("<!--[-1-->");
+      $$renderer2.push(`<div class="grid svelte-1r6rcuo"><!--[-->`);
+      const each_array_1 = ensure_array_like(studios);
+      for (let $$index_1 = 0, $$length = each_array_1.length; $$index_1 < $$length; $$index_1++) {
+        let st = each_array_1[$$index_1];
+        PosterCard($$renderer2, {
+          href: `/studio/${st.id}`,
+          image: st.mainImage,
+          title: displayName(st.names),
+          subtitle: st.founded
+        });
+      }
+      $$renderer2.push(`<!--]--></div>`);
+    }
+    $$renderer2.push(`<!--]--></div>`);
+  });
+}
+export {
+  _page as default
+};
