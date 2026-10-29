@@ -14,6 +14,22 @@
   - авто-синхронизация при запуске и закрытии приложения (настраивается);
   - экспорт/импорт базы в JSON (со слиянием и дедупликацией) и в файл SQLite.
 
+## Скачать и запустить
+
+Готовые сборки публикуются в разделе [**Releases**](https://github.com/KellerHalm/Pergamon/releases/latest). Go, Node.js и Wails для запуска не нужны.
+
+| ОС | Файл | Как запустить |
+|---|---|---|
+| Windows 10/11 | `Pergamon-windows-amd64.zip` | Распакуйте архив и запустите `Pergamon.exe` |
+| macOS | `Pergamon-macos-universal.zip` | Распакуйте и переместите `Pergamon.app` в «Программы» |
+| Linux | `Pergamon-linux-amd64.tar.gz` | Распакуйте и запустите `./Pergamon` |
+
+Примечания:
+
+- На Windows требуется WebView2 — он предустановлен в Windows 10/11. При первом запуске SmartScreen может показать предупреждение (сборка не подписана): «Подробнее» → «Выполнить в любом случае».
+- На macOS сборка не подписана. При первом запуске: правый клик по `Pergamon.app` → «Открыть», либо «Системные настройки» → «Конфиденциальность и безопасность» → «Всё равно открыть».
+- На Linux должны быть установлены GTK 3 и WebKit2GTK (`sudo apt install libgtk-3-0 libwebkit2gtk-4.0-37`).
+
 ## Стек технологий
 
 | Слой | Технологии |
@@ -25,7 +41,7 @@
 | Редактор заметок | TipTap 3 |
 | Иконки | lucide-svelte |
 
-## Требования
+## Требования для сборки из исходников
 
 - **Go** ≥ 1.25 — [go.dev/dl](https://go.dev/dl/)
 - **Node.js** ≥ 18 с npm — [nodejs.org](https://nodejs.org/)
@@ -82,6 +98,17 @@ wails build
 wails build -debug    # сборка с devtools
 wails build -platform windows/amd64   # явное указание платформы
 ```
+
+### Публикация релиза
+
+Релизы собираются автоматически в GitHub Actions (`.github/workflows/release.yml`) для Windows, macOS и Linux. Чтобы выпустить новую версию, отправьте тег:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Workflow соберёт приложения и прикрепит архивы к GitHub Release. Сборку также можно запустить вручную на вкладке **Actions** → **Release** → **Run workflow** — готовые архивы будут доступны в артефактах.
 
 ## Тесты
 
