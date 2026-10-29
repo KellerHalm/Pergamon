@@ -62,9 +62,7 @@ jobs:
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
-        run: |
-          cd build/bin
-          7z a "../../Pergamon-windows-amd64.zip" Pergamon.exe
+        run: cp build/bin/Pergamon.exe Pergamon.exe
 
       - name: Package (macOS)
         if: runner.os == 'macOS'
@@ -83,6 +81,7 @@ jobs:
         with:
           name: Pergamon-${{ runner.os }}
           path: |
+            Pergamon.exe
             Pergamon-*.zip
             Pergamon-*.tar.gz
           if-no-files-found: error

@@ -20,7 +20,7 @@
 
 | ОС | Файл | Как запустить |
 |---|---|---|
-| Windows 10/11 | `Pergamon-windows-amd64.zip` | Распакуйте архив и запустите `Pergamon.exe` |
+| Windows 10/11 | `Pergamon.exe` | Просто скачайте и запустите, распаковка не нужна |
 | macOS | `Pergamon-macos-universal.zip` | Распакуйте и переместите `Pergamon.app` в «Программы» |
 | Linux | `Pergamon-linux-amd64.tar.gz` | Распакуйте и запустите `./Pergamon` |
 
